@@ -275,33 +275,3 @@ class ControlRow(QtWidgets.QWidget):
         }
         logger.debug(f'Sending refresh request: {request}')
         self.send_request.emit(request)
-
-    def update_from_refresh(self, payload): #Trenger kanskje ikke denne hvis vi håndtrer det i handle_status_update
-        """Update measured value labels from a refresh reply."""
-        for index, row in enumerate(self.rows):
-            channel = index + 1
-            channel_state = payload.get(channel) or payload.get(str(channel))
-            if not isinstance(channel_state, dict):
-                continue
-
-            if "get_voltage" in channel_state:
-                try:
-                    row["meas_voltage"].setText(f"{float(channel_state['get_voltage']):.3f} V")
-                except (ValueError, TypeError):
-                    row["meas_voltage"].setText(str(channel_state['get_voltage']))
-
-            if "get_current" in channel_state:
-                try:
-                    row["meas_current"].setText(f"{float(channel_state['get_current']):.3f} A")
-                except (ValueError, TypeError):
-                    row["meas_current"].setText(str(channel_state['get_current']))
-
-            if "get_output" in channel_state:
-                try:
-                    outp_on = bool(int(float(str(channel_state['get_output']))))
-                except (ValueError, TypeError):
-                    outp_on = False
-                row["meas_output"].setText("ON" if outp_on else "OFF")
-                row["meas_output"].setStyleSheet(
-                    f"color: {'#4CAF50' if outp_on else '#F44336'}; font-weight: bold;"
-                )
