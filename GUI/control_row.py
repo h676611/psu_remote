@@ -176,6 +176,11 @@ class ControlRow(QtWidgets.QWidget):
         if reply.get("name") != self.instrument_name:
             return
         logger.info(f"received reply: {reply}")
+
+        if reply.get("type") == "refresh_reply":
+            self.update_from_refresh(reply.get("payload", {}))
+            return
+
         # TODO [KAN-19] handle replies
 
     @QtCore.pyqtSlot(dict)
@@ -260,3 +265,43 @@ class ControlRow(QtWidgets.QWidget):
 
         self.send_request.emit(request)
         
+
+    def send_refresh_request(self):
+        """Send a refresh request to query all live values from the PSU."""
+        if not self.connected:
+            return
+        request = {
+            "name": self.instrument_name,
+            "payload": {"refresh": True}
+        }
+        self.send_request.emit(request)
+
+    def update_from_refresh(self, payload):
+        """Update measured value labels from a refresh reply."""
+        for index, row in enumerate(self.rows):
+            channel = index + 1
+            channel_state = payload.get(channel) or payload.get(str(channel))
+            if not isinstance(channel_state, dict):
+                continue
+
+            if "get_voltage" in channel_state:
+                try:
+                    row["meas_voltage"].setText(f"{float(channel_state['get_voltage']):.3f} V")
+                except (ValueError, TypeError):
+                    row["meas_voltage"].setText(str(channel_state['get_voltage']))
+
+            if "get_current" in channel_state:
+                try:
+                    row["meas_current"].setText(f"{float(channel_state['get_current']):.3f} A")
+                except (ValueError, TypeError):
+                    row["meas_current"].setText(str(channel_state['get_current']))
+
+            if "get_display_output" in channel_state:
+                try:
+                    outp_on = bool(int(float(str(channel_state['get_display_output']))))
+                except (ValueError, TypeError):
+                    outp_on = False
+                row["meas_output"].setText("ON" if outp_on else "OFF")
+                row["meas_output"].setStyleSheet(
+                    f"color: {'#4CAF50' if outp_on else '#F44336'}; font-weight: bold;"
+                )

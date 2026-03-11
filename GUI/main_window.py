@@ -40,8 +40,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.label = QtWidgets.QLabel("PSU Control Panel")
         layout.addWidget(self.label)
 
+        # Refresh button
+        self.refresh_button = QtWidgets.QPushButton("Refresh All")
+        self.refresh_button.clicked.connect(self.refresh_all)
+        layout.addWidget(self.refresh_button)
+
         for i, instrument_name in enumerate(self.instrument_names):
             row_name = self.connection_names[i] if i < len(self.connection_names) else None
             row = ControlRow(instrument_name=instrument_name, row_name=row_name)
             layout.addWidget(row)
             self.control_rows.append(row)
+
+    def refresh_all(self):
+        """Send a refresh request for each connected PSU to update live values."""
+        for row in self.control_rows:
+            row.send_refresh_request()
