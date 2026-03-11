@@ -42,13 +42,15 @@ class PSUQueue:
                         reply_payload[command] = last_response
             else: # if it is a set command we just send the command to the psu and then query the state of the psu
                 for command, args in payload.items():
-                    scpi_cmd = self.cli_to_scpi(command, args)
+                    try:
+                        scpi_cmd = self.cli_to_scpi(command, args)
 
-                    logger.info(f"Writing command: {scpi_cmd}")
-                    self.psu.write(scpi_cmd)
+                        logger.info(f"Writing command: {scpi_cmd}")
+                        self.psu.write(scpi_cmd)
 
-                    logger.info(f"Response: {last_response}")
-
+                        logger.info(f"Response: {last_response}")
+                    except Exception as e:
+                        logger.error(f"Error processing command {command} with args {args}: {e}")
 
                 # After processing set commands, we query all get commands to update the state
                 reply_payload.update(self.query_all_get_commands())
@@ -106,13 +108,19 @@ class PSUQueue:
     def query_all_get_commands(self):
         logger.debug('Querying all get commands to update state')
         state = {}
-        for command, scpi_template in self.dic.items():
-            if command.startswith("get") and isinstance(scpi_template, str):
+        # for command, scpi_template in self.dic.items():
+        #     if command.startswith("get") and isinstance(scpi_template, str):
+        #         scpi_cmd = scpi_template.format(*["?"] * scpi_template.count("{}"))
+        #         response = self.psu.query(scpi_cmd)
+        #         state[command] = response
+        # return state
+        commands = ["get_voltage","get_current", "get_output"]
+        for command in commands:
+            scpi_template = self.dic.get(command)
+            if scpi_template:
                 scpi_cmd = scpi_template.format(*["?"] * scpi_template.count("{}"))
                 response = self.psu.query(scpi_cmd)
                 state[command] = response
         return state
-
-
 
 

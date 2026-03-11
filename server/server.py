@@ -56,7 +56,7 @@ class Server:
         logger.info(f"received request for {name} at {address}: {payload}")
 
         # Handle system commands
-        system_commands = {"connect", "disconnect", "status"}
+        system_commands = {"connect", "disconnect", "status", "refresh"}
         for command, value in payload.items():
             if command in system_commands and value:
                 self.handle_system_command(identity, address, command, name=name, request_id=request_id)
@@ -149,13 +149,24 @@ class Server:
 
     def send_status(self, identity, address, name=None, request_id=None):
         psu = self.psus.get(address)
+        psu_queue = self.psu_queues[address]
+        status = {}
+        num_channels = getattr(psu, 'num_channels', 1)
+        if num_channels > 1 and "set_channel" in psu_queue.dic:
+            for ch in range(1, num_channels + 1):
+                ch_cmd = psu_queue.dic["set_channel"].format(ch)
+                psu.write(ch_cmd)
+                status[ch] = psu_queue.query_all_get_commands()
+        else:
+            status[1] = psu_queue.query_all_get_commands()
         status_message = {
             "type": "status_update",
             "name": psu.name,
-            "status": psu.get_state(), 
+            "status": status,
             "address": address,
             "request_id": request_id
         }
+        logger.debug(f'Sending status update: {status_message}')
         self.send_response(identity, status_message)
 
 
@@ -178,7 +189,7 @@ class Server:
             "type": "status_update",
             "name": psu.name,
             "address": address,
-            "status": psu.get_state()
+            #"status": psu.get_state() har ikke state noe lenger
         }
         self.broadcast(status_message)
 

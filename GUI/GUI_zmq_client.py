@@ -46,7 +46,7 @@ class ZmqClient(QtCore.QObject):
 
                 logger.info(f'received: {msg}')
 
-                if msg_type in ("scpi_reply", "system_reply", "refresh_reply"):
+                if msg_type in ("scpi_reply", "system_reply"):
                     if request_id in self._pending:
                         self._pending.remove(request_id)
                         self.reply_received.emit(request_id, msg)
