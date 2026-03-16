@@ -19,7 +19,7 @@ K6500_dic = {
     "reset": "*RST",
     "get_voltage": "MEAS:VOLT?",
     "set_channel": "ROUTE:OPEN:ALL;:ROUTE:CLOSE (@{});:READ?",
-    "get_channel": "ROUT:MULTIPLE:CLOSE?",
+    "get_channel": "route:multiple:close?",
     "get_channel_voltage": "ROUT:OPEN:ALL;:ROUT:CLOS (@{});:READ?"
 }
 
@@ -58,7 +58,7 @@ K2400_dic = {
     "set_output": "OUTP {}",
     "set_output_all": "OUTP:GEN {}",
     "set_source": "SOUR:FUNC {}",
-    "set_autorange": "SENS:CURR:RANG:AUTO {}",
+    "set_autorange": "SOUR:CURR:RANG:AUTO {}",
     "set_current_sense_range": "SENS:CURR:RANGE {}",
     "set_current": "SOUR:CURR {}",
     "set_voltage": "SOUR:VOLT {}",
