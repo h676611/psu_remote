@@ -175,7 +175,12 @@ class ControlRow(QtWidgets.QWidget):
     def handle_reply(self, request_id, reply):
         if reply.get("name") != self.instrument_name:
             return
-        logger.info(f"received reply: {reply}")
+        #logger.info(f"received reply: {reply}")
+
+        if reply.get("type") == "refresh_reply":
+            self.update_from_refresh(reply["payload"])
+            return
+
         # TODO [KAN-19] handle replies
 
     @QtCore.pyqtSlot(dict)
@@ -189,29 +194,29 @@ class ControlRow(QtWidgets.QWidget):
 
 
         if not isinstance(status, dict): # bare håndter dict status payloads og ignorerer alt annet
+            logger.error(f"Received status update with invalid format: {status}")
             return
         for index, row in enumerate(self.rows): # gå igjennom kanaler
             channel = index + 1
-            channel_state = status.get(channel) # read channel state
+            # Server sends channel keys as ints, but JSON may convert to strings
+            channel_state = status.get(channel)
             if channel_state is None:
                 channel_state = status.get(str(channel))
             if not isinstance(channel_state, dict): # skip om kanalen ikke har status
                 continue
-
-            # TODO: fix live status from new type psu state payloads, currently assumes old format with "VOLT", "CURR", "OUTP" keys in channel state
-            if "VOLT" in channel_state:
+            if "get_voltage" in channel_state:
                 try:
-                    row["meas_voltage"].setText(f"{float(channel_state['VOLT']):.3f} V")
+                    row["meas_voltage"].setText(f"{float(channel_state['get_voltage']):.3f} V")
                 except (ValueError, TypeError):
-                    row["meas_voltage"].setText(str(channel_state["VOLT"]))
-            if "CURR" in channel_state:
+                    row["meas_voltage"].setText(str(channel_state["get_voltage"]))
+            if "get_current" in channel_state:
                 try:
-                    row["meas_current"].setText(f"{float(channel_state['CURR']):.3f} A")
+                    row["meas_current"].setText(f"{float(channel_state['get_current']):.3f} A")
                 except (ValueError, TypeError):
-                    row["meas_current"].setText(str(channel_state["CURR"]))
-            if "OUTP" in channel_state:
+                    row["meas_current"].setText(str(channel_state["get_current"]))
+            if "get_output" in channel_state:
                 try:
-                    outp_on = bool(int(float(str(channel_state["OUTP"]))))
+                    outp_on = bool(int(float(str(channel_state["get_output"]))))
                 except (ValueError, TypeError):
                     outp_on = False
                 row["meas_output"].setText("ON" if outp_on else "OFF")
@@ -261,3 +266,12 @@ class ControlRow(QtWidgets.QWidget):
 
         self.send_request.emit(request)
         
+
+    def send_refresh_request(self):
+        """Send a refresh request to query all live values from the PSU."""
+        request = {
+            "name": self.instrument_name,
+            "payload": {"status": True}
+        }
+        logger.debug(f'Sending refresh request: {request}')
+        self.send_request.emit(request)
