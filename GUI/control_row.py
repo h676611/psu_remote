@@ -197,6 +197,8 @@ class ControlRow(QtWidgets.QWidget):
                 channel_state = status.get(str(channel))
             if not isinstance(channel_state, dict): # skip om kanalen ikke har status
                 continue
+
+            # TODO: fix live status from new type psu state payloads, currently assumes old format with "VOLT", "CURR", "OUTP" keys in channel state
             if "VOLT" in channel_state:
                 try:
                     row["meas_voltage"].setText(f"{float(channel_state['VOLT']):.3f} V")

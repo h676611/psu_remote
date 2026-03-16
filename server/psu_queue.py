@@ -30,6 +30,9 @@ class PSUQueue:
             reply_payload = {
 
             }
+
+            # TODO: k6500 must use query for set commands
+
             if any(key.startswith("get") for key in payload): #If it is a get command we query the psu
                     for command, args in payload.items():
                         scpi_cmd = self.cli_to_scpi(command, args)
