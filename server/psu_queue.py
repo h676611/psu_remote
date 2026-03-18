@@ -72,7 +72,6 @@ class PSUQueue:
                         self.selected_channel = args
 
                     if command == "set_voltage":
-                        logger.debug(f'Updating status for channel {self.selected_channel} voltage to {args}')
                         self.status[self.selected_channel]["voltage"] = args
                     elif command == "set_current":
                         self.status[self.selected_channel]["current"] = args
