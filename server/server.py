@@ -90,7 +90,6 @@ class Server:
         self.psu_queues[address].add_command(identity, payload, request_id=request_id)
 
 
-
     def connect_psu(self, address, identity=None, name=None, request_id=None):
         if address in self.psu_queues:
             logger.error(f"PSU {address} already connected")

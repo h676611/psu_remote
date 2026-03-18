@@ -88,20 +88,11 @@ class PSUQueue:
                 "payload": reply_payload
             }
 
+            if any(key.startswith("set") for key in payload):
+                self.server.send_status(identity, self.address, request_id=request_id)
 
             self.server.send_response(identity, reply)
 
-
-    def broadcast_update(self):
-        # state = self.query_all_get_commands()
-        # state_message = {
-        #     "type": "status_update",
-        #     "name": self.name,
-        #     "status": state,
-        #     "address": self.address
-        # }
-        # self.server.broadcast(state_message)
-        pass
 
     def cli_to_scpi(self, command, args):
         base_scpi = self.dic.get(command)
