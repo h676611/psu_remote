@@ -150,15 +150,7 @@ class Server:
     def send_status(self, identity, address, name=None, request_id=None):
         psu = self.psus.get(address)
         psu_queue = self.psu_queues[address]
-        status = {}
-        num_channels = getattr(psu, 'num_channels', 1)
-        if num_channels > 1 and "set_channel" in psu_queue.dic:
-            for ch in range(1, num_channels + 1):
-                ch_cmd = psu_queue.dic["set_channel"].format(ch)
-                psu.write(ch_cmd)
-                status[ch] = psu_queue.query_all_get_commands()
-        else:
-            status[1] = psu_queue.query_all_get_commands()
+        status = psu_queue.status
         status_message = {
             "type": "status_update",
             "name": psu.name,
