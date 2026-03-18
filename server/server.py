@@ -143,7 +143,6 @@ class Server:
 
         self.send_response(identity, reply)
 
-
     def send_status(self, identity, address, name=None, request_id=None):
         psu = self.psus.get(address)
         psu_queue = self.psu_queues[address]
