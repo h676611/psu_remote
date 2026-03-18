@@ -121,9 +121,9 @@ class PSUQueue:
             if "set_channel" in self.dic:
                 ch_cmd = self.dic["set_channel"].format(channel)
                 self.psu.write(ch_cmd)
-                self.status[channel] = self.query_voltage_current()
+                self.status[channel]["voltage"], self.status[channel]["current"] = self.query_voltage_current()
             else:
-                self.status[channel] = self.query_voltage_current()
+                self.status[channel]["voltage"], self.status[channel]["current"] = self.query_voltage_current()
 
     def query_voltage_current(self):
         voltage = None
@@ -134,4 +134,4 @@ class PSUQueue:
         if "get_current" in self.dic:
             current_cmd = self.dic["get_current"]
             current = self.psu.query(current_cmd)
-        return {"voltage": voltage, "current": current}
+        return [voltage, current]

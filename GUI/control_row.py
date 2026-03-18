@@ -13,8 +13,8 @@ class ControlRow(QtWidgets.QWidget):
         super().__init__(parent)
         self.instrument_name = instrument_name
 
-        self.connected = False
-        self._prev_connected = False
+        self.connected = True
+        self._prev_connected = True
 
         self.row_name = row_name
         
@@ -35,7 +35,7 @@ class ControlRow(QtWidgets.QWidget):
         top_layout.addWidget(self.name_label)
 
         # connect button
-        self.toggle_button = QtWidgets.QPushButton("Start")
+        self.toggle_button = QtWidgets.QPushButton(self.connected and "Stop" or "Start")
         self.toggle_button.clicked.connect(self.on_toggle)
         top_layout.addWidget(self.toggle_button)
 
@@ -77,58 +77,56 @@ class ControlRow(QtWidgets.QWidget):
 
         for i in range(num_rows):
             row_layout = QtWidgets.QHBoxLayout()
-
-            row_layout_top = QtWidgets.QVBoxLayout()
             
             # Create a dictionary to hold this row's widgets
-            row_widgets = {}
+            self.row_widgets = {}
 
             # Label
             label_text = f"{i+1}" if num_rows > 1 else instrument_name
-            row_widgets['label'] = QtWidgets.QLabel(label_text)
-            row_layout.addWidget(row_widgets['label'])
+            self.row_widgets['label'] = QtWidgets.QLabel(label_text)
+            row_layout.addWidget(self.row_widgets['label'])
 
             # Voltage Input
-            row_widgets['voltage_input'] = QtWidgets.QDoubleSpinBox()
-            row_widgets['voltage_input'].setSuffix(' V')
-            row_widgets['voltage_input'].setRange(-100., 100.)
-            row_layout.addWidget(row_widgets['voltage_input'])
+            self.row_widgets['voltage_input'] = QtWidgets.QDoubleSpinBox()
+            self.row_widgets['voltage_input'].setSuffix(' V')
+            self.row_widgets['voltage_input'].setRange(-100., 100.)
+            row_layout.addWidget(self.row_widgets['voltage_input'])
 
             # Current Input
-            row_widgets['current_input'] = QtWidgets.QDoubleSpinBox()
-            row_widgets['current_input'].setSuffix(' A')
-            row_widgets['current_input'].setRange(-10., 10.)
-            row_layout.addWidget(row_widgets['current_input'])
+            self.row_widgets['current_input'] = QtWidgets.QDoubleSpinBox()
+            self.row_widgets['current_input'].setSuffix(' A')
+            self.row_widgets['current_input'].setRange(-10., 10.)
+            row_layout.addWidget(self.row_widgets['current_input'])
 
             # Output on/off
-            row_widgets['on_off_channel_toggle'] = QtWidgets.QCheckBox()
-            row_layout.addWidget(row_widgets["on_off_channel_toggle"])
+            self.row_widgets['on_off_channel_toggle'] = QtWidgets.QCheckBox()
+            row_layout.addWidget(self.row_widgets["on_off_channel_toggle"])
 
             # Send Button
             send_btn = QtWidgets.QPushButton(f"Send")
             
             # 2. Use lambda with a default variable 'row=i' to capture the current index
             send_btn.clicked.connect(
-                lambda checked, row=i, toggle=row_widgets["on_off_channel_toggle"]:
+                lambda checked, row=i, toggle=self.row_widgets["on_off_channel_toggle"]:
                     self.on_row_submitted(row, toggle.isChecked())
             )
             row_layout.addWidget(send_btn)
 
             # Measured value labels (read-only live feedback)
-            row_widgets['meas_voltage'] = QtWidgets.QLabel("—")
-            row_widgets['meas_voltage'].setStyleSheet("color: #2196F3; font-weight: bold;")
-            row_layout.addWidget(row_widgets['meas_voltage'])
+            self.row_widgets['meas_voltage'] = QtWidgets.QLabel("—")
+            self.row_widgets['meas_voltage'].setStyleSheet("color: #2196F3; font-weight: bold;")
+            row_layout.addWidget(self.row_widgets['meas_voltage'])
 
-            row_widgets['meas_current'] = QtWidgets.QLabel("—")
-            row_widgets['meas_current'].setStyleSheet("color: #2196F3; font-weight: bold;")
-            row_layout.addWidget(row_widgets['meas_current'])
+            self.row_widgets['meas_current'] = QtWidgets.QLabel("—")
+            self.row_widgets['meas_current'].setStyleSheet("color: #2196F3; font-weight: bold;")
+            row_layout.addWidget(self.row_widgets['meas_current'])
 
-            row_widgets['meas_output'] = QtWidgets.QLabel("—")
-            row_widgets['meas_output'].setStyleSheet("color: #888; font-weight: bold;")
-            row_layout.addWidget(row_widgets['meas_output'])
+            self.row_widgets['meas_output'] = QtWidgets.QLabel("—")
+            self.row_widgets['meas_output'].setStyleSheet("color: #888; font-weight: bold;")
+            row_layout.addWidget(self.row_widgets['meas_output'])
 
             # Store the dictionary in our list and add layout to screen
-            self.rows.append(row_widgets)
+            self.rows.append(self.row_widgets)
             main_layout.addLayout(row_layout)
 
 
@@ -205,24 +203,20 @@ class ControlRow(QtWidgets.QWidget):
             if not isinstance(channel_state, dict): # skip om kanalen ikke har status
                 continue
             if "voltage" in channel_state:
-                try:
-                    row["meas_voltage"].setText(f"{float(channel_state['voltage']):.3f} V")
-                except (ValueError, TypeError):
-                    row["meas_voltage"].setText(str(channel_state["voltage"]))
+                row["meas_voltage"].setText(f"{float(channel_state['voltage']):.3f} V")
+                self.rows[index]["voltage_input"].setValue(float(channel_state['voltage']))
             if "current" in channel_state:
-                try:
-                    row["meas_current"].setText(f"{float(channel_state['current']):.3f} A")
-                except (ValueError, TypeError):
-                    row["meas_current"].setText(str(channel_state["current"]))
+                row["meas_current"].setText(f"{float(channel_state['current']):.3f} A")
+                self.rows[index]["current_input"].setValue(float(channel_state['current']))
             if "output" in channel_state:
-                try:
-                    outp_on = bool(int(float(str(channel_state["output"]))))
-                except (ValueError, TypeError):
-                    outp_on = False
+                outp_on = bool(int(float(str(channel_state["output"]))))
                 row["meas_output"].setText("ON" if outp_on else "OFF")
                 row["meas_output"].setStyleSheet(
                     f"color: {'#4CAF50' if outp_on else '#F44336'}; font-weight: bold;"
                 )
+                self.rows[index]["on_off_channel_toggle"].setChecked(outp_on)
+
+
 
     
     @QtCore.pyqtSlot(dict)

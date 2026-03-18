@@ -110,6 +110,9 @@ class Server:
             psu = PSU(self.rm.open_resource(address), name=name)
         else:
             psu = PSU(self.rm.open_resource(address))
+        # Keep the configured address as the canonical key used across server and queue.
+        # PyVISA may normalize USB resource names (e.g. append "::0::INSTR").
+        psu.address = address
         psu.connected = True
         self.psus[address] = psu
         self.psu_queues[address] = PSUQueue(self.psus[address], self)
