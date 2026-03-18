@@ -109,7 +109,6 @@ class Server:
         logger.info(f'connected psu: {psu.name}')
 
         if identity:
-            self.broadcast_status(address)
 
             reply = {
                 "type": "system_reply",
@@ -131,8 +130,6 @@ class Server:
         psu.connected = False
         del self.psu_queues[address]
         logger.info(f'Diconnected PSU {psu.name}')
-
-        self.broadcast_status(address)
 
         reply = {
             "type": "system_reply",
@@ -172,23 +169,6 @@ class Server:
             }
         }
         self.send_response(identity, reply)
-
-    def broadcast_status(self, address):
-        psu = self.psus.get(address)
-        if not psu:
-            return
-        status_message = {
-            "type": "status_update",
-            "name": psu.name,
-            "address": address,
-            #"status": psu.get_state() har ikke state noe lenger
-        }
-        self.broadcast(status_message)
-
-    def broadcast(self, message):
-        logger.info(f"Broadcasting status update")
-        for client in self.clients:
-            self.send_response(client, message)
 
     def send_response(self, identity, response):
         # logger.info(f'Sending response {response}')
