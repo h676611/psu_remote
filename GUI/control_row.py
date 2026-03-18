@@ -271,7 +271,7 @@ class ControlRow(QtWidgets.QWidget):
         """Send a refresh request to query all live values from the PSU."""
         request = {
             "name": self.instrument_name,
-            "payload": {"status": True}
+            "payload": {"refresh": True}
         }
         logger.debug(f'Sending refresh request: {request}')
         self.send_request.emit(request)

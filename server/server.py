@@ -71,6 +71,7 @@ class Server:
             "connect": self.connect_psu,
             "disconnect": self.disconnect_psu,
             "status": self.send_status,
+            "refresh": self.refresh_status
         }
 
         handler = dispatch.get(command)
@@ -81,6 +82,14 @@ class Server:
 
         handler(address=address, identity=identity, name=name, request_id=request_id)
 
+    def refresh_status(self, address, identity=None, name=None, request_id=None):
+        if address not in self.psu_queues:
+            self.send_error(identity, "PSU not connected", address, request_id=request_id)
+            return
+
+        psu_queue = self.psu_queues[address]
+        psu_queue.refresh_status()
+        self.send_status(identity, address, name=name, request_id=request_id)
 
     def handle_scpi_command(self, identity, address, payload, request_id=None):
         if address not in self.psu_queues:

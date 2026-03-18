@@ -116,22 +116,22 @@ class PSUQueue:
         return scpi_cmd
     
 
-    def query_all_get_commands(self):
-        # logger.debug('Querying all get commands to update state')
-        state = {}
-        # for command, scpi_template in self.dic.items():
-        #     if command.startswith("get") and isinstance(scpi_template, str):
-        #         scpi_cmd = scpi_template.format(*["?"] * scpi_template.count("{}"))
-        #         response = self.psu.query(scpi_cmd)
-        #         state[command] = response
-        # return state
-        commands = ["get_voltage","get_current", "get_output"]
-        for command in commands:
-            scpi_template = self.dic.get(command)
-            if scpi_template:
-                scpi_cmd = scpi_template.format(*["?"] * scpi_template.count("{}"))
-                response = self.psu.query(scpi_cmd)
-                state[command] = response
-        return state
+    def refresh_status(self):
+        for channel in range(1, self.num_channels + 1):
+            if "set_channel" in self.dic:
+                ch_cmd = self.dic["set_channel"].format(channel)
+                self.psu.write(ch_cmd)
+                self.status[channel] = self.query_voltage_current()
+            else:
+                self.status[channel] = self.query_voltage_current()
 
-
+    def query_voltage_current(self):
+        voltage = None
+        current = None
+        if "get_voltage" in self.dic:
+            voltage_cmd = self.dic["get_voltage"]
+            voltage = self.psu.query(voltage_cmd)
+        if "get_current" in self.dic:
+            current_cmd = self.dic["get_current"]
+            current = self.psu.query(current_cmd)
+        return {"voltage": voltage, "current": current}
