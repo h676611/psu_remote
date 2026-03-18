@@ -17,6 +17,18 @@ class PSUQueue:
 
         self.name = psu.name
         self.dic = get_dic_for_PSU(self.name)
+        self.status = {}
+        self.selected_channel = 1
+        if self.name == "hmp4040":
+            self.num_channels = 4
+        else:
+            self.num_channels = 1
+        for channel in range(1, self.num_channels + 1):
+            self.status[channel] = {
+                "voltage": None,
+                "current": None,
+                "output": None
+            }
 
         self.thread.start()
         
@@ -54,14 +66,17 @@ class PSUQueue:
                         logger.info(f"Response: {last_response}")
                     except Exception as e:
                         logger.error(f"Error processing command {command} with args {args}: {e}")
+                        
+                if command == "set_channel":
+                    self.selected_channel = args
 
-                # After processing set commands, we query all get commands to update the state
-                reply_payload.update(self.query_all_get_commands())
-                
+                if command == "set_voltage":
+                    self.status[self.selected_channel]["voltage"] = args
+                elif command == "set_current":
+                    self.status[self.selected_channel]["current"] = args
+                elif command == "set_output":
+                    self.status[self.selected_channel]["output"] = args
 
-
-            if any(key.startswith("set") for key in payload):
-                self.broadcast_update()
 
             reply = {
                 "type": "scpi_reply",
