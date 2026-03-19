@@ -2,12 +2,12 @@ import re
 from logger import setup_logger
 from .Translate import get_dic_for_PSU
 
-logger = setup_logger("PSU")
 class PSU:
     """Represents a Power Supply Unit with SCPI command handling."""
     def __init__(self, resource, num_channels=4, name="hmp4040"):
         self.name = name
-        logger.name = name
+        self.logger = setup_logger(name=name)
+        
         self.num_channels = num_channels
         if self.name != "hmp4040":
             self.num_channels = 1
@@ -29,14 +29,17 @@ class PSU:
                 current_response = self.resource.query(command)
                 current_str = current_response.split(",")[1].strip()
                 return float(current_str)
-        response = self.resource.query(command)
-        logger.debug(f'querying {command}, got response: {response}')
         if self.name == "hmp4040":
-            response = self.resource.read()
+            self.logger.debug('i hmp4040')
+            response = self.resource.query(command)
+            self.logger.debug(f'querying {command}, got response: {response}')
+            
+        else:
+            response = self.resource.query(command)
         return response
 
     def write(self, command):
+        self.logger.debug(f'writing {command}')
         self.resource.write(command)
-        logger.debug(f'reading {self.resource.read()}')
-        logger.debug(f'writing {command}')
+        self.logger.debug(f'reading {self.resource.read()}')
             

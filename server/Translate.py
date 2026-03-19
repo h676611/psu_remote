@@ -89,12 +89,12 @@ K2450_dic = {
     "set_voltage": "SOUR:VOLT {}",
     "get_current": "MEAS:CURR?",
     "get_voltage": "MEAS:VOLT?",
-    "set_current_limit": "SOUR:VOLT:ILIMIT {}",
-    "set_voltage_limit": "SOUR:CURR:VLIMIT {}",
+    "set_current_limit": "SOUR:VOLT:ILIM {}",
+    "set_voltage_limit": "SOUR:CURR:VLIM {}",
     "get_display_current": "SOUR:CURR?",
     "get_display_voltage": "SOUR:VOLT?",
     "get_display_output": "OUTP?",
-    "get_current_limit": "SOUR:VOLT:ILIMIT?",
-    "get_voltage_limit": "SOUR:CURR:VLIMIT?",
+    "get_current_limit": "SOUR:VOLT:ILIM?",
+    "get_voltage_limit": "SOUR:CURR:VLIM?",
     "set_four_wire_sense": ":SENSe:CURRent:RSENse {}"
 }

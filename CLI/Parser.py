@@ -171,6 +171,17 @@ class K2450_Parser(ordered_argparse.ArgumentParser):
             description="K2450 PSU CLI",
             parents=[base]
         )
+        self.add_argument(
+            "get-current-limit"
+            action='store_const',
+            const=''
+        )
+        
+        self.add_argument(
+            "get-voltage-limit"
+            action='store_const',
+            const=''
+        )
     
 class K6500_Parser(ordered_argparse.ArgumentParser):
     def __init__(self):

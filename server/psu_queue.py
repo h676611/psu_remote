@@ -50,27 +50,10 @@ class PSUQueue:
 
                         scpi_cmd = self.cli_to_scpi(command, args)
 
-                        # logger.info(f"Querying command: {scpi_cmd}")
+                        logger.info(f"Querying command: {scpi_cmd}")
                         last_response = self.psu.query(scpi_cmd)
 
-                        # logger.info(f"Response: {last_response}")
-
-                        if self.name == "k2400":
-                            if command == "get_voltage":
-                                try:
-                                    voltage_str = last_response.split(",")[0].strip()
-                                    last_response = float(voltage_str)
-                                except (ValueError, IndexError) as e:
-                                    self.logger.error(f"Could not parse voltage from response: '{last_response}'")
-                                raise ValueError(f"Could not parse voltage from response: '{last_response}'") from e
-                            elif command == "get_current":
-                                try:
-                                    current_str = last_response.split(",")[1].strip()  # Use second value which is typically actual current
-                                    last_response = float(current_str)
-                                    logger.debug(f'current str: {current_str}')
-                                except (ValueError, IndexError) as e:
-                                    self.logger.error(f"Could not parse current from response: '{last_response}'")
-                                    raise ValueError(f"Could not parse current from response: '{last_response}'") from e
+                        logger.info(f"Response: {last_response}")
 
                         reply_payload[command] = last_response
             else: # if it is a set command we just send the command to the psu and then query the state of the psu
@@ -78,12 +61,12 @@ class PSUQueue:
                     try:
                         scpi_cmd = self.cli_to_scpi(command, args)
 
-                        # logger.info(f"Writing command: {scpi_cmd}")
-                        self.psu.write(scpi_cmd)
+                        logger.info(f"Writing command: {scpi_cmd}")
+                        self.psu.query(scpi_cmd)
 
-                        # logger.info(f"Response: {last_response}")
+                        logger.info(f"Response: {last_response}")
                     except Exception as e:
-                        # logger.error(f"Error processing command {command} with args {args}: {e}")
+                        logger.error(f"Error processing command {command} with args {args}: {e}")
                         pass
 
                     if command == "set_channel":
