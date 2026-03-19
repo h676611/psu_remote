@@ -47,12 +47,29 @@ class PSUQueue:
 
             if any(key.startswith("get") for key in payload): #If it is a get command we query the psu
                     for command, args in payload.items():
+
                         scpi_cmd = self.cli_to_scpi(command, args)
 
                         # logger.info(f"Querying command: {scpi_cmd}")
                         last_response = self.psu.query(scpi_cmd)
 
                         # logger.info(f"Response: {last_response}")
+
+                        if self.name == "k2400":
+                            if command == "get_voltage":
+                                try:
+                                    voltage_str = last_response.split(",")[0].strip()
+                                    last_response = float(voltage_str)
+                                except (ValueError, IndexError) as e:
+                                    self.logger.error(f"Could not parse voltage from response: '{last_response}'")
+                                raise ValueError(f"Could not parse voltage from response: '{last_response}'") from e
+                            elif command == "get_current":
+                                try:
+                                    current_str = last_response.split(",")[1].strip()  # Use second value which is typically actual current
+                                    last_response = float(current_str)
+                                except (ValueError, IndexError) as e:
+                                    self.logger.error(f"Could not parse current from response: '{last_response}'")
+                                    raise ValueError(f"Could not parse current from response: '{last_response}'") from e
 
                         reply_payload[command] = last_response
             else: # if it is a set command we just send the command to the psu and then query the state of the psu
@@ -127,6 +144,23 @@ class PSUQueue:
     def query_voltage_current(self):
         voltage = None
         current = None
+        if self.name == "k2400":
+            try:
+                voltage_cmd = self.dic.get("get_voltage")
+                voltage_response = self.psu.query(voltage_cmd)
+                voltage_str = voltage_response.split(",")[0].strip()
+                voltage = float(voltage_str)
+            except (ValueError, IndexError) as e:
+                self.logger.error(f"Could not parse voltage from response: '{voltage_response}'")
+                raise ValueError(f"Could not parse voltage from response: '{voltage_response}'") from e
+            try:                
+                current_cmd = self.dic.get("get_current")
+                current_response = self.psu.query(current_cmd)
+                current_str = current_response.split(",")[1].strip()  # Use second value which is typically actual current
+                current = float(current_str)
+            except (ValueError, IndexError) as e:
+                self.logger.error(f"Could not parse current from response: '{current_response}'")
+                raise ValueError(f"Could not parse current from response: '{current_response}'") from e
         if "get_voltage" in self.dic:
             voltage_cmd = self.dic["get_voltage"]
             voltage = self.psu.query(voltage_cmd)
