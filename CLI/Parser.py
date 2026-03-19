@@ -163,6 +163,13 @@ class Hmp4040_Parser(ordered_argparse.ArgumentParser):
             nargs=1,
             metavar=('CHANNEL')
         )
+        
+        self.add_argument(
+            "--set-current-voltage",
+            dest="set_current_voltage",
+            nargs=2,
+            metavar=('CURRENT', 'VOLTAGE')
+        )
 
 class K2400_Parser(ordered_argparse.ArgumentParser):
     def __init__(self):
