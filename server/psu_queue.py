@@ -134,14 +134,22 @@ class PSUQueue:
     
 
     def refresh_status(self):
-        for channel in range(1, self.num_channels + 1):
-            if "set_channel" in self.dic:
-                ch_cmd = self.dic["set_channel"].format(channel)
-                self.psu.write(ch_cmd)
-                self.status[channel]["voltage"], self.status[channel]["current"] = self.query_voltage_current()
-            else:
-                self.status[channel]["voltage"], self.status[channel]["current"] = self.query_voltage_current()
-
+        if self.name == "hmp4040":
+            for channel in range(1, self.num_channels + 1):
+                voltage_cmd = self.dic["get_channel_voltage"].format(channel)
+                current_cmd = self.dic["get_channel_current"].format(channel)
+                voltage_response = self.psu.query(voltage_cmd)
+                current_response = self.psu.query(current_cmd)
+                self.status[channel]["voltage"] = voltage_response
+                self.status[channel]["current"] = current_response
+        else:
+            voltage_cmd = self.dic.get("get_voltage")
+            current_cmd = self.dic.get("get_current")
+            voltage_response = self.psu.query(voltage_cmd)
+            current_response = self.psu.query(current_cmd)
+            self.status[1]["voltage"] = voltage_response
+            self.status[1]["current"] = current_response
+            
     def query_voltage_current(self):
         voltage = None
         current = None

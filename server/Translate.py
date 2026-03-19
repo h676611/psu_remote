@@ -48,7 +48,9 @@ HMP4040_dic = {
     "set_current_voltage": "CURR {};VOLT {}",
     "set_channel_voltage": "INST OUT{};VOLT {}",
     "set_channel_current": "INST OUT{};CURR {}",
-    "set_channel_current_voltage": "INST OUT{};CURR {};VOLT {}"
+    "set_channel_current_voltage": "INST OUT{};CURR {};VOLT {}",
+    "get_channel_current": "INST OUT{};MEAS:CURR?",
+    "get_channel_voltage": "INST OUT{};MEAS:VOLT?"
 }
 K2400_dic = {
     # Note: Some commands may differ on the 2400 vs. 2450.
