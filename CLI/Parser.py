@@ -155,6 +155,14 @@ class Hmp4040_Parser(ordered_argparse.ArgumentParser):
             metavar=('CHANNEL', 'CURRENT', 'VOLTAGE'),
             help="set CURRENT and VOLTAGE at specified channel CHANNEL"
         )
+        
+        self.add_argument(
+            "--get-channel-voltage",
+            "-gcv",
+            dest="get_channel_voltage",
+            nargs=1,
+            metavar=('CHANNEL')
+        )
 
 class K2400_Parser(ordered_argparse.ArgumentParser):
     def __init__(self):
@@ -172,13 +180,13 @@ class K2450_Parser(ordered_argparse.ArgumentParser):
             parents=[base]
         )
         self.add_argument(
-            "get-current-limit"
+            "--get-current-limit",
             action='store_const',
             const=''
         )
         
         self.add_argument(
-            "get-voltage-limit"
+            "--get-voltage-limit",
             action='store_const',
             const=''
         )

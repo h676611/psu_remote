@@ -62,7 +62,7 @@ class PSUQueue:
                         scpi_cmd = self.cli_to_scpi(command, args)
 
                         logger.info(f"Writing command: {scpi_cmd}")
-                        self.psu.query(scpi_cmd)
+                        self.psu.write(scpi_cmd)
 
                         logger.info(f"Response: {last_response}")
                     except Exception as e:

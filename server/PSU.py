@@ -31,15 +31,16 @@ class PSU:
                 return float(current_str)
         if self.name == "hmp4040":
             self.logger.debug('i hmp4040')
-            response = self.resource.query(command)
+            self.resource.write(command)
+            response = self.resource.read(command)
             self.logger.debug(f'querying {command}, got response: {response}')
             
         else:
-            response = self.resource.query(command)
+            self.resource.write(command)
+            response = self.resource.read(command)
         return response
 
     def write(self, command):
         self.logger.debug(f'writing {command}')
         self.resource.write(command)
-        self.logger.debug(f'reading {self.resource.read()}')
             
