@@ -54,8 +54,8 @@ devices:
           q: "CURR {:.2f}"
           r: OK
         specs:
-          min: 0.0
-          max: 5.0
+          min: -10.0
+          max: 10.0
           type: float
 
       current_limit:
@@ -67,8 +67,8 @@ devices:
           q: "VOLT ILIM {:.2f}"
           r: OK
         specs:
-          min: 0.0
-          max: 5.0
+          min: -10.0
+          max: 10.0
           type: float
 
       voltage_limit:
@@ -80,7 +80,7 @@ devices:
           q: "CURR VLIM {:.2f}"
           r: OK
         specs:
-          min: 0.0
+          min: -10.0
           max: 32.0
           type: float
 
@@ -167,8 +167,8 @@ devices:
           q: "SOUR:CURR {:.2f}"
           r: OK
         specs:
-          min: 0.0
-          max: 5.0
+          min: -10.0
+          max: 10.0
           type: float
 
       current_limit:
@@ -180,8 +180,8 @@ devices:
           q: "SOUR:VOLT:ILIMIT {:.2f}"
           r: Ok
         specs:
-          min: 0.0
-          max: 5.0
+          min: -10.0
+          max: 10.0
           type: float
 
       voltage:
@@ -272,16 +272,10 @@ devices:
       USB INSTR:
         q: "\r\n"
         r: "\n"
-
-    error: "Keithley Instruments,2450,dummy,psu"
-
+    error: "Error from K2450 dummy psu"
     dialogues:
       - q: "*IDN?"
-        r: "Keithley Instruments,2450,dummy,1.0"
-
-      - q: "SYST:ERR?"
-        r: "0,No error"
-
+        r: "K2450 ID"
     properties:
       output:
         default: 0
@@ -295,14 +289,57 @@ devices:
           valid: [0, 1]
           type: int
 
-      output_all:
-        default: 0
+      current:
+        default: 0.0
+        getter:
+          q: "MEAS:CURR?"
+          r: "{:.2f}"
         setter:
-          q: "OUTP:GEN {:d}"
+          q: "SOUR:CURR {:.2f}"
           r: OK
         specs:
-          valid: [0, 1]
-          type: int
+          min: -10.0
+          max: 10.0
+          type: float
+
+      current_limit:
+        default: 5.0
+        getter:
+          q: "SOUR:VOLT:ILIMIT?"
+          r: "{:.2f}"
+        setter:
+          q: "SOUR:VOLT:ILIMIT {:.2f}"
+          r: Ok
+        specs:
+          min: -10.0
+          max: 10.0
+          type: float
+
+      voltage:
+        default: 0.0
+        getter:
+          q: "MEAS:VOLT?"
+          r: "{:.2f}"
+        setter:
+          q: "SOUR:VOLT {:.2f}"
+          r: OK
+        specs:
+          min: 0.0
+          max: 32.0
+          type: float
+
+      voltage_limit:
+        default: 32.0
+        getter:
+          q: "SOUR:CURR:VLIMIT?"
+          r: "{:.2f}"
+        setter:
+          q: "SOUR:CURR:VLIMIT {:.2f}"
+          r: OK
+        specs:
+          min: 0.0
+          max: 32.0
+          type: float
 
       source_function:
         default: "VOLT"
@@ -322,86 +359,34 @@ devices:
           valid: [0, 1]
           type: int
 
-      voltage:
-        default: 0.0
-        getter:
-          q: "MEAS:VOLT?"
-          r: "{:.3f}"
+      voltage_range:
+        default: 32.0
         setter:
-          q: "SOUR:VOLT {:.3f}"
+          q: "SOUR:VOLT:RANG {:.2f}"
           r: OK
         specs:
           min: 0.0
-          max: 200.0
-          type: float
-
-      voltage_range:
-        default: 200.0
-        setter:
-          q: "SOUR:VOLT:RANG {:.3f}"
-          r: OK
-        specs:
-          min: 0.2
-          max: 200.0
+          max: 32.0
           type: float
 
       display_voltage:
         default: 0.0
         getter:
           q: "SOUR:VOLT?"
-          r: "{:.3f}"
+          r: "{:.2f}"
         specs:
           min: 0.0
-          max: 200.0
+          max: 32.0
           type: float
-
-      voltage_limit:
-        default: 200.0
-        getter:
-          q: "SOUR:CURR:VLIMIT?"
-          r: "{:.3f}"
-        setter:
-          q: "SOUR:CURR:VLIMIT {:.3f}"
-          r: OK
-        specs:
-          min: 0.0
-          max: 200.0
-          type: float
-
-      current:
-        default: 0.0
-        getter:
-          q: "MEAS:CURR?"
-          r: "{:.6f}"
-        setter:
-          q: "SOUR:CURR {:.6f}"
-          r: OK
-        specs:
-          min: 0.0
-          max: 1.0
-          type: float
-
+        
       display_current:
         default: 0.0
         getter:
           q: "SOUR:CURR?"
-          r: "{:.6f}"
+          r: "{:.2f}"
         specs:
-          min: 0.0
-          max: 1.0
-          type: float
-
-      current_limit:
-        default: 1.0
-        getter:
-          q: "SOUR:VOLT:ILIMIT?"
-          r: "{:.6f}"
-        setter:
-          q: "SOUR:VOLT:ILIMIT {:.6f}"
-          r: OK
-        specs:
-          min: 0.0
-          max: 1.0
+          min: -10.0
+          max: 10.0
           type: float
 
       four_wire_sense:
@@ -459,7 +444,7 @@ resources:
     device: HMP4040
   GPIB0::24::INSTR:
     device: K2400
-  USB0::0x05E6::0x2450::04424778::INSTR:
+  USB0::0x05E6::0x2450::04424778:0:INSTR:
     device: K2450
-  USB0::0x05E6::0x6500::04543021::INSTR:
+  USB0::0x05E6::0x6500::04543021:0:INSTR:
     device: K6500

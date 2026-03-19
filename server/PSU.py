@@ -22,9 +22,6 @@ class PSU:
         logger.debug(f'querying {command}, got response: {response}')
         return response
 
-    def get_state(self):
-        return self.states
-
     def write(self, command):
         self.resource.write(command)
         logger.debug(f'reading {self.resource.read()}')

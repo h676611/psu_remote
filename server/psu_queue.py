@@ -17,6 +17,18 @@ class PSUQueue:
 
         self.name = psu.name
         self.dic = get_dic_for_PSU(self.name)
+        self.status = {}
+        self.selected_channel = 1
+        if self.name == "hmp4040":
+            self.num_channels = 4
+        else:
+            self.num_channels = 1
+        for channel in range(1, self.num_channels + 1):
+            self.status[channel] = {
+                "voltage": 0.0,
+                "current": 0.0,
+                "output": 0
+            }
 
         self.thread.start()
         
@@ -37,10 +49,10 @@ class PSUQueue:
                     for command, args in payload.items():
                         scpi_cmd = self.cli_to_scpi(command, args)
 
-                        logger.info(f"Querying command: {scpi_cmd}")
+                        # logger.info(f"Querying command: {scpi_cmd}")
                         last_response = self.psu.query(scpi_cmd)
 
-                        logger.info(f"Response: {last_response}")
+                        # logger.info(f"Response: {last_response}")
 
                         reply_payload[command] = last_response
             else: # if it is a set command we just send the command to the psu and then query the state of the psu
@@ -48,20 +60,24 @@ class PSUQueue:
                     try:
                         scpi_cmd = self.cli_to_scpi(command, args)
 
-                        logger.info(f"Writing command: {scpi_cmd}")
+                        # logger.info(f"Writing command: {scpi_cmd}")
                         self.psu.write(scpi_cmd)
 
-                        logger.info(f"Response: {last_response}")
+                        # logger.info(f"Response: {last_response}")
                     except Exception as e:
-                        logger.error(f"Error processing command {command} with args {args}: {e}")
+                        # logger.error(f"Error processing command {command} with args {args}: {e}")
+                        pass
 
-                # After processing set commands, we query all get commands to update the state
-                reply_payload.update(self.query_all_get_commands())
-                
+                    if command == "set_channel":
+                        self.selected_channel = args
 
+                    if command == "set_voltage":
+                        self.status[self.selected_channel]["voltage"] = args
+                    elif command == "set_current":
+                        self.status[self.selected_channel]["current"] = args
+                    elif command == "set_output":
+                        self.status[self.selected_channel]["output"] = args
 
-            if any(key.startswith("set") for key in payload):
-                self.broadcast_update()
 
             reply = {
                 "type": "scpi_reply",
@@ -71,20 +87,11 @@ class PSUQueue:
                 "payload": reply_payload
             }
 
+            if any(key.startswith("set") for key in payload):
+                self.server.send_status(identity, self.address, request_id=request_id)
 
             self.server.send_response(identity, reply)
 
-
-    def broadcast_update(self):
-        # state = self.query_all_get_commands()
-        # state_message = {
-        #     "type": "status_update",
-        #     "name": self.name,
-        #     "status": state,
-        #     "address": self.address
-        # }
-        # self.server.broadcast(state_message)
-        pass
 
     def cli_to_scpi(self, command, args):
         base_scpi = self.dic.get(command)
@@ -96,7 +103,7 @@ class PSUQueue:
         # No arguments
         if args is None or args == '':
             scpi_cmd = base_scpi
-            logger.debug(f'converted command: {scpi_cmd}')
+            # logger.debug(f'converted command: {scpi_cmd}')
             return scpi_cmd
         # ardument is list or tuple
         elif isinstance(args, (list, tuple)):
@@ -108,22 +115,22 @@ class PSUQueue:
         return scpi_cmd
     
 
-    def query_all_get_commands(self):
-        logger.debug('Querying all get commands to update state')
-        state = {}
-        # for command, scpi_template in self.dic.items():
-        #     if command.startswith("get") and isinstance(scpi_template, str):
-        #         scpi_cmd = scpi_template.format(*["?"] * scpi_template.count("{}"))
-        #         response = self.psu.query(scpi_cmd)
-        #         state[command] = response
-        # return state
-        commands = ["get_voltage","get_current", "get_output"]
-        for command in commands:
-            scpi_template = self.dic.get(command)
-            if scpi_template:
-                scpi_cmd = scpi_template.format(*["?"] * scpi_template.count("{}"))
-                response = self.psu.query(scpi_cmd)
-                state[command] = response
-        return state
+    def refresh_status(self):
+        for channel in range(1, self.num_channels + 1):
+            if "set_channel" in self.dic:
+                ch_cmd = self.dic["set_channel"].format(channel)
+                self.psu.write(ch_cmd)
+                self.status[channel]["voltage"], self.status[channel]["current"] = self.query_voltage_current()
+            else:
+                self.status[channel]["voltage"], self.status[channel]["current"] = self.query_voltage_current()
 
-
+    def query_voltage_current(self):
+        voltage = None
+        current = None
+        if "get_voltage" in self.dic:
+            voltage_cmd = self.dic["get_voltage"]
+            voltage = self.psu.query(voltage_cmd)
+        if "get_current" in self.dic:
+            current_cmd = self.dic["get_current"]
+            current = self.psu.query(current_cmd)
+        return [voltage, current]

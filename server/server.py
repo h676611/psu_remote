@@ -71,6 +71,7 @@ class Server:
             "connect": self.connect_psu,
             "disconnect": self.disconnect_psu,
             "status": self.send_status,
+            "refresh": self.refresh_status
         }
 
         handler = dispatch.get(command)
@@ -81,6 +82,14 @@ class Server:
 
         handler(address=address, identity=identity, name=name, request_id=request_id)
 
+    def refresh_status(self, address, identity=None, name=None, request_id=None):
+        if address not in self.psu_queues:
+            self.send_error(identity, "PSU not connected", address, request_id=request_id)
+            return
+
+        psu_queue = self.psu_queues[address]
+        psu_queue.refresh_status()
+        self.send_status(identity, address, name=name, request_id=request_id)
 
     def handle_scpi_command(self, identity, address, payload, request_id=None):
         if address not in self.psu_queues:
@@ -88,7 +97,6 @@ class Server:
             return
 
         self.psu_queues[address].add_command(identity, payload, request_id=request_id)
-
 
 
     def connect_psu(self, address, identity=None, name=None, request_id=None):
@@ -102,6 +110,12 @@ class Server:
             psu = PSU(self.rm.open_resource(address), name=name)
         else:
             psu = PSU(self.rm.open_resource(address))
+        # Keep the configured address as the canonical key used across server and queue.
+        # PyVISA may normalize USB resource names (e.g. append "::0::INSTR").
+
+        logger.debug(f'Address from config: {address}, actual resource address: {psu.resource.resource_name}')
+
+        psu.address = address
         psu.connected = True
         self.psus[address] = psu
         self.psu_queues[address] = PSUQueue(self.psus[address], self)
@@ -109,7 +123,6 @@ class Server:
         logger.info(f'connected psu: {psu.name}')
 
         if identity:
-            self.broadcast_status(address)
 
             reply = {
                 "type": "system_reply",
@@ -132,8 +145,6 @@ class Server:
         del self.psu_queues[address]
         logger.info(f'Diconnected PSU {psu.name}')
 
-        self.broadcast_status(address)
-
         reply = {
             "type": "system_reply",
             "name": psu.name,
@@ -146,19 +157,10 @@ class Server:
 
         self.send_response(identity, reply)
 
-
     def send_status(self, identity, address, name=None, request_id=None):
         psu = self.psus.get(address)
         psu_queue = self.psu_queues[address]
-        status = {}
-        num_channels = getattr(psu, 'num_channels', 1)
-        if num_channels > 1 and "set_channel" in psu_queue.dic:
-            for ch in range(1, num_channels + 1):
-                ch_cmd = psu_queue.dic["set_channel"].format(ch)
-                psu.write(ch_cmd)
-                status[ch] = psu_queue.query_all_get_commands()
-        else:
-            status[1] = psu_queue.query_all_get_commands()
+        status = psu_queue.status
         status_message = {
             "type": "status_update",
             "name": psu.name,
@@ -180,23 +182,6 @@ class Server:
             }
         }
         self.send_response(identity, reply)
-
-    def broadcast_status(self, address):
-        psu = self.psus.get(address)
-        if not psu:
-            return
-        status_message = {
-            "type": "status_update",
-            "name": psu.name,
-            "address": address,
-            #"status": psu.get_state() har ikke state noe lenger
-        }
-        self.broadcast(status_message)
-
-    def broadcast(self, message):
-        logger.info(f"Broadcasting status update")
-        for client in self.clients:
-            self.send_response(client, message)
 
     def send_response(self, identity, response):
         # logger.info(f'Sending response {response}')
