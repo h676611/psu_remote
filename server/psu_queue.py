@@ -67,6 +67,7 @@ class PSUQueue:
                                 try:
                                     current_str = last_response.split(",")[1].strip()  # Use second value which is typically actual current
                                     last_response = float(current_str)
+                                    logger.debug(f'current str: {current_str}')
                                 except (ValueError, IndexError) as e:
                                     self.logger.error(f"Could not parse current from response: '{last_response}'")
                                     raise ValueError(f"Could not parse current from response: '{last_response}'") from e
@@ -161,10 +162,13 @@ class PSUQueue:
             except (ValueError, IndexError) as e:
                 self.logger.error(f"Could not parse current from response: '{current_response}'")
                 raise ValueError(f"Could not parse current from response: '{current_response}'") from e
-        if "get_voltage" in self.dic:
-            voltage_cmd = self.dic["get_voltage"]
-            voltage = self.psu.query(voltage_cmd)
-        if "get_current" in self.dic:
-            current_cmd = self.dic["get_current"]
-            current = self.psu.query(current_cmd)
+        else:
+            if "get_voltage" in self.dic:
+                voltage_cmd = self.dic["get_voltage"]
+                voltage = self.psu.query(voltage_cmd)
+            if "get_current" in self.dic:
+                current_cmd = self.dic["get_current"]
+                current = self.psu.query(current_cmd)
+            
+        logger.debug(f'voltage: {voltage}. current: {current}')
         return [voltage, current]

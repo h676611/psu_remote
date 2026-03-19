@@ -7,6 +7,7 @@ class PSU:
     """Represents a Power Supply Unit with SCPI command handling."""
     def __init__(self, resource, num_channels=4, name="hmp4040"):
         self.name = name
+        logger.name = name
         self.num_channels = num_channels
         if self.name != "hmp4040":
             self.num_channels = 1
@@ -20,6 +21,8 @@ class PSU:
     def query(self, command):
         response = self.resource.query(command)
         logger.debug(f'querying {command}, got response: {response}')
+        if self.name == "hmp4040":
+            response = self.resource.read()
         return response
 
     def write(self, command):
