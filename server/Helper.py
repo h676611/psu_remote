@@ -40,10 +40,8 @@ class Helper:
                 for i in range(len(scpi_commands)):
                     cli_command = self.scpi_to_cli(scpi_commands[i])
                     new_payload[cli_command] = float(args[i])
-            else:
-                new_payload[command] = args
-        payload.clear()
-        payload.update(new_payload)
+                payload.clear()
+                payload.update(new_payload)
         
     def scpi_to_cli(self, scpi_cmd):
         # This function takes a scpi command and turns it back into a cli command by looking for the scpi command in the dic and returning the corresponding cli command
