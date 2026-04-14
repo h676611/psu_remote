@@ -6,10 +6,7 @@
         "address": "GPIB0::24::INSTR"
     },
     "k2450": {
-        "address": "USB0::0x05E6::0x2450::04424778:0:INSTR"
-    },
-    "k6500": {
-        "address": "USB0::0x05E6::0x6500::04543021:0:INSTR"
+        "address": "USB0::0x05E6::0x2450::04424778::INSTR"
     }
 }
     

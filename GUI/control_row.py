@@ -203,11 +203,19 @@ class ControlRow(QtWidgets.QWidget):
             if not isinstance(channel_state, dict): # skip om kanalen ikke har status
                 continue
             if "voltage" in channel_state:
-                row["meas_voltage"].setText(f"{float(channel_state['voltage']):.3f} V")
-                self.rows[index]["voltage_input"].setValue(float(channel_state['voltage']))
+                try:
+                    row["meas_voltage"].setText(f"{float(channel_state['voltage']):.3f} V")
+                    self.rows[index]["voltage_input"].setValue(float(channel_state['voltage']))
+                except ValueError:
+                    row["meas_voltage"].setText(f"{str(channel_state['voltage']):.3f} V")
+                    self.rows[index]["voltage_input"].setValue(str(channel_state['voltage']))
             if "current" in channel_state:
-                row["meas_current"].setText(f"{float(channel_state['current']):.3f} A")
-                self.rows[index]["current_input"].setValue(float(channel_state['current']))
+                try:
+                    row["meas_current"].setText(f"{float(channel_state['current']):.3f} A")
+                    self.rows[index]["current_input"].setValue(float(channel_state['current']))
+                except ValueError:
+                    row["meas_current"].setText(f"{str(channel_state['current']):.3f} V")
+                    self.rows[index]["current_input"].setValue(str(channel_state['current']))
             if "output" in channel_state:
                 outp_on = bool(int(float(str(channel_state["output"]))))
                 row["meas_output"].setText("ON" if outp_on else "OFF")
