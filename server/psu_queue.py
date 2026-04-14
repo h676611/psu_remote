@@ -1,6 +1,7 @@
 import threading
 import queue
 from logger import setup_logger
+from server.Helper import Helper
 from .Translate import get_dic_for_PSU
 
 logger = setup_logger("PSUqueue")
@@ -14,6 +15,7 @@ class PSUQueue:
         self.queue = queue.Queue()
         self.thread = threading.Thread(target=self.worker, daemon=True)
         self.address = psu.address
+        self.helper = Helper(psu)
 
         self.name = psu.name
         self.dic = get_dic_for_PSU(self.name)
@@ -33,6 +35,7 @@ class PSUQueue:
         self.thread.start()
         
     def add_command(self, identity, payload, request_id=None):
+        self.helper.seperate_aggregated_commands(payload)
         self.queue.put((identity, payload, request_id))
 
     def worker(self):
@@ -48,7 +51,7 @@ class PSUQueue:
             if any(key.startswith("get") for key in payload): #If it is a get command we query the psu
                     for command, args in payload.items():
 
-                        scpi_cmd = self.cli_to_scpi(command, args)
+                        scpi_cmd = self.helper.cli_to_scpi(command, args)
 
                         logger.info(f"Querying command: {scpi_cmd}")
                         last_response = self.psu.query(scpi_cmd)
@@ -59,7 +62,7 @@ class PSUQueue:
             else: # if it is a set command we just send the command to the psu and then query the state of the psu
                 for command, args in payload.items():
                     try:
-                        scpi_cmd = self.cli_to_scpi(command, args)
+                        scpi_cmd = self.helper.cli_to_scpi(command, args)
 
                         logger.info(f"Writing command: {scpi_cmd}")
                         self.psu.write(scpi_cmd)
@@ -92,28 +95,6 @@ class PSUQueue:
                 self.server.send_status(identity, self.address, request_id=request_id)
 
             self.server.send_response(identity, reply)
-
-
-    def cli_to_scpi(self, command, args):
-        base_scpi = self.dic.get(command)
-
-
-        if base_scpi is None:
-            raise ValueError(f"Unknown command: {command}")
-
-        # No arguments
-        if args is None or args == '':
-            scpi_cmd = base_scpi
-            # logger.debug(f'converted command: {scpi_cmd}')
-            return scpi_cmd
-        # ardument is list or tuple
-        elif isinstance(args, (list, tuple)):
-            scpi_cmd = base_scpi.format(*args)
-        # argument is single value
-        elif isinstance(args, (int, float, str)):
-            scpi_cmd = base_scpi.format(args)
-        
-        return scpi_cmd
     
 
     def refresh_status(self):

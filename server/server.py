@@ -14,7 +14,7 @@ class Server:
         self.socket = self.context.socket(zmq.ROUTER)
         self.socket.bind(address)
         self.psu_queues = {}
-        self.rm = pyvisa.ResourceManager()
+        self.rm = pyvisa.ResourceManager('psu_sims.yaml@sim')
         self.clients = set()
 
         self.config = config
