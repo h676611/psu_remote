@@ -14,6 +14,8 @@ class PSU:
 
         self.resource = resource
 
+        # self.resource.timeout = 5000  # Set a timeout for resource operations
+
         self.connected = False
         
         self.address = resource.resource_name
@@ -27,17 +29,19 @@ class PSU:
                 return float(voltage_str)
             if command == "MEAS:CURR?":
                 current_response = self.resource.query(command)
-                current_str = current_response.split(",")[1].strip()
+                # current_str = current_response.split(",")[1].strip() for lab testing
+                current_str = current_response.split(",")[0].strip()
                 return float(current_str)
         if self.name == "hmp4040":
-            self.logger.debug('i hmp4040')
-            self.resource.write(command)
-            response = self.resource.read(command)
+            response = self.resource.query(command)
+            # self.resource.write(command)
+            # response = self.resource.read(command)
             self.logger.debug(f'querying {command}, got response: {response}')
             
         else:
-            self.resource.write(command)
-            response = self.resource.read(command)
+            response = self.resource.query(command)
+            # self.resource.write(command)
+            # response = self.resource.read(command)
         return response
 
     def write(self, command):

@@ -1,5 +1,6 @@
 import threading
 import queue
+from time import sleep
 from logger import setup_logger
 from server.Helper import Helper
 from .Translate import get_dic_for_PSU
@@ -101,10 +102,9 @@ class PSUQueue:
     def refresh_status(self):
         if self.name == "hmp4040":
             for channel in range(1, self.num_channels + 1):
-
                 # handle set channel and get voltage as two queries for hmp4040 since it needs to know which channel to query from
                 set_channel_cmd = self.dic.get("set_channel").format(channel)
-                self.psu.write(set_channel_cmd)
+                self.psu.query(set_channel_cmd)
                 voltage_cmd = self.dic.get("get_voltage")
                 current_cmd = self.dic.get("get_current")
                 voltage_response = self.psu.query(voltage_cmd)
@@ -123,6 +123,7 @@ class PSUQueue:
                 self.status[1]["voltage"] = voltage_response
             if current_response is not None and str(current_response).strip() != "":
                 self.status[1]["current"] = current_response
+
             
     def query_voltage_current(self):
         voltage = None
