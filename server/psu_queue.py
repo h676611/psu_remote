@@ -84,7 +84,6 @@ class PSUQueue:
                     elif command == "set_output":
                         self.status[self.selected_channel]["output"] = args
 
-
             reply = {
                 "type": "scpi_reply",
                 "name": self.name,
@@ -94,9 +93,12 @@ class PSUQueue:
             }
 
             if any(key.startswith("set") for key in payload):
-                self.server.send_status(identity, self.address, request_id=request_id)
+                self.server.send_status(identity=identity, psu_name=self.name)
 
             self.server.send_response(identity, reply)
+
+            self.refresh_status()
+            self.server.send_status_update_to_all(self.status, psu_name=self.name)
     
 
     def refresh_status(self):

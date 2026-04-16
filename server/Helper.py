@@ -41,7 +41,10 @@ class Helper:
                 for i in range(len(scpi_commands)):
                     cli_command = self.scpi_to_cli(scpi_commands[i])
                     if isinstance(args, (list, tuple)) and i < len(args):
-                        new_payload[cli_command] = float(args[i])
+                        if cli_command == "set_channel": # if the command is set channel we need to make sure the argument is an integer and not a float since the psu expects an integer for the channel number
+                            new_payload[cli_command] = int(args[i])
+                        else:
+                            new_payload[cli_command] = float(args[i])
                     else:
                         new_payload[cli_command] = float(args)
             else:
