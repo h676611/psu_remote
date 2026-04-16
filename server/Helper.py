@@ -1,7 +1,8 @@
 
+import logger
 from server.Translate import get_dic_for_PSU
 
-
+logger = logger.setup_logger("Helper")
 class Helper:
     def __init__(self, PSU):
         self.psu = PSU
@@ -39,13 +40,20 @@ class Helper:
                 scpi_commands = scpi_cmd.split(";")
                 for i in range(len(scpi_commands)):
                     cli_command = self.scpi_to_cli(scpi_commands[i])
-                    new_payload[cli_command] = float(args[i])
-                payload.clear()
-                payload.update(new_payload)
+                    if isinstance(args, (list, tuple)) and i < len(args):
+                        new_payload[cli_command] = float(args[i])
+                    else:
+                        new_payload[cli_command] = float(args)
+            else:
+                new_payload[command] = args
+
+        logger.debug(f"Seperated aggregated command: {new_payload}")
+        return new_payload
         
     def scpi_to_cli(self, scpi_cmd):
         # This function takes a scpi command and turns it back into a cli command by looking for the scpi command in the dic and returning the corresponding cli command
         for cli_command, scpi_command in self.dic.items():
             if scpi_cmd.startswith(scpi_command.split("{")[0]): # we split the scpi command at the "{" to ignore the arguments when comparing
+                logger.debug(f'converted command: {cli_command}')
                 return cli_command
         raise ValueError(f"Unknown scpi command: {scpi_cmd}")

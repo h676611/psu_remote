@@ -32,7 +32,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.zmq_client.status_update_received.connect(row.handle_status_update)
             self.zmq_client.error_received.connect(row.handle_error)
 
-        #self.refresh_all()
+        QtCore.QTimer.singleShot(100, self.refresh_all)
 
 
 
