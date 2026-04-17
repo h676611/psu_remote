@@ -1,6 +1,6 @@
 import zmq
 class ZMQClient:
-   def __init__(self, address="tcp://localhost:5555"):
+   def __init__(self, address="tcp://158.37.237.11:5555"):
       self.context = zmq.Context()
       self.socket = self.context.socket(zmq.DEALER)
       self.socket.connect(address)
