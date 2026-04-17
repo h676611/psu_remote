@@ -170,6 +170,7 @@ class Server:
         self.socket.send_json(response)
 
     def send_status_update_to_all(self, status, psu_name):
-        logger.debug(f'Sending status update to all clients: {status}')
-        for client in self.clients:
-            self.send_status(identity=client, psu_name=psu_name)
+        pass
+        #logger.debug(f'Sending status update to all clients: {status}')
+        #for client in self.clients:
+        #    self.send_status(identity=client, psu_name=psu_name)

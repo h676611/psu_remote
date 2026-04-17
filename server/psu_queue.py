@@ -67,7 +67,7 @@ class PSUQueue:
                         scpi_cmd = self.helper.cli_to_scpi(command, args)
 
                         logger.info(f"Writing (query) command: {scpi_cmd}")
-                        self.psu.query(scpi_cmd)
+                        self.psu.write(scpi_cmd)
 
                         logger.info(f"Response: {last_response}")
                     except Exception as e:
@@ -97,8 +97,8 @@ class PSUQueue:
 
             self.server.send_response(identity, reply)
 
-            self.refresh_status()
-            self.server.send_status_update_to_all(self.status, psu_name=self.name)
+            #self.refresh_status()
+            #self.server.send_status_update_to_all(self.status, psu_name=self.name)
     
 
     def refresh_status(self):
