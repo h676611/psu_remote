@@ -25,6 +25,13 @@ class MainWindow(QtWidgets.QMainWindow):
         # Setup GUI
         self.init_ui()
 
+        self.zmq_client.send({
+            "type": "system_request",
+            "payload": {
+                "connect_GUI": True
+            }
+        })
+
         # Connect signals
         for row in self.control_rows:
             row.send_request.connect(self.zmq_client.send)

@@ -48,16 +48,11 @@ class PSUQueue:
 
             self.refresh_status()
 
-            reply = {
-                "type": "scpi_reply",
-                "name": self.name,
-                "status": self.status
-            }
+            self.server.send_status(identity, psu_name=self.name)
 
-            # if any(key.startswith("set") for key in payload):
-            #     self.server.send_status(identity=identity, psu_name=self.name)
+            if any(key.startswith("set") for key in payload):
+                self.server.send_status_to_GUI(psu_name=self.name)
 
-            self.server.send_response(identity, reply)
 
             # self.server.send_status_update_to_all(self.status, psu_name=self.name)
     

@@ -40,6 +40,7 @@ class PSU:
                 return float(current_str)
         else:
             response = self.resource.query(command)
+            self.logger.info(f"Response: {response}")
         return response
 
     def write(self, command):

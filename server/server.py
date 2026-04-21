@@ -23,6 +23,8 @@ class Server:
 
         self.psus = {}
 
+        self.connected_GUIs = set() # contains the identities of connected GUIs to send status updates to
+
     def start(self):
         logger.info("Server started")
 
@@ -46,10 +48,10 @@ class Server:
         payload = request.get("payload", {})
         psu_name = request.get("name")
 
-        logger.info(f"received request for {psu_name} with payload: {payload}")
+        logger.info(f"received request: {request}")
 
         # Handle system commands
-        system_commands = {"connect", "disconnect", "status", "refresh"}
+        system_commands = {"connect", "disconnect", "status", "refresh", "connect_GUI"}
         for command, value in payload.items():
             if command in system_commands and value:
                 self.handle_system_command(identity, command, psu_name=psu_name)
@@ -64,7 +66,8 @@ class Server:
             "connect": self.connect_psu,
             "disconnect": self.disconnect_psu,
             "status": self.send_status,
-            "refresh": self.refresh_status
+            "refresh": self.refresh_status,
+            "connect_GUI": self.connect_GUI,
         }
 
         handler = dispatch.get(command)
@@ -142,6 +145,10 @@ class Server:
 
         self.send_response(identity, reply)
 
+    def connect_GUI(self, identity, psu_name=None):
+        self.connected_GUIs.add(identity)
+        logger.info(f"Connected GUI with identity {identity}")
+
     def send_status(self, identity, psu_name):
         psu = self.psus.get(psu_name)
         psu_queue = self.psu_queues[psu_name]
@@ -153,6 +160,19 @@ class Server:
             "psu_name": psu_name
         }
         self.send_response(identity, status_message)
+
+    def send_status_to_GUI(self, psu_name):
+        psu = self.psus.get(psu_name)
+        psu_queue = self.psu_queues[psu_name]
+        status = psu_queue.status
+        status_message = {
+            "type": "status_update",
+            "name": psu.name,
+            "status": status,
+            "psu_name": psu_name
+        }
+        for GUI in self.connected_GUIs:
+            self.send_response(GUI, status_message)
 
 
     def send_error(self, identity, message, psu_name):

@@ -284,7 +284,7 @@ devices:
           r: "{:d}"
         setter:
           q: "OUTP {:d}"
-          r: OK
+          # r: OK
         specs:
           valid: [0, 1]
           type: int
@@ -296,7 +296,7 @@ devices:
           r: "{:.2f}"
         setter:
           q: "SOUR:CURR {:.2f}"
-          r: OK
+          # r: OK
         specs:
           min: -10.0
           max: 10.0
@@ -309,7 +309,7 @@ devices:
           r: "{:.2f}"
         setter:
           q: "SOUR:VOLT:ILIMIT {:.2f}"
-          r: Ok
+          # r: Ok
         specs:
           min: -10.0
           max: 10.0
@@ -322,7 +322,7 @@ devices:
           r: "{:.2f}"
         setter:
           q: "SOUR:VOLT {:.2f}"
-          r: OK
+          # r: OK
         specs:
           min: 0.0
           max: 32.0
