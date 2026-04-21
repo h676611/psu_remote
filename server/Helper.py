@@ -1,18 +1,23 @@
 import logger
+from server import PSU
 from server.Translate import get_dic_for_PSU
+from server.psu_queue import PSUQueue
 from .k6500_queue import K6500Queue
 from .hmp4040_queue import HMP4040Queue
 from .k2400_queue import K2400Queue
 from .k2450_queue import K2450Queue
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .server import Server
 
 logger = logger.setup_logger("Helper")
 class Helper:
-    def __init__(self, PSU):
-        self.psu = PSU
-        self.dic = get_dic_for_PSU(self.psu.name)
-    
-    def cli_to_scpi(self, command, args):
-        base_scpi = self.dic.get(command)
+    def __init__(self, PSU: PSU):
+        self.psu: PSU = PSU
+        self.dic: dict = get_dic_for_PSU(self.psu.name)
+
+    def cli_to_scpi(self, command: str, args: list | tuple | None) -> str:
+        base_scpi: str | None = self.dic.get(command)
 
 
         if base_scpi is None:
@@ -35,16 +40,16 @@ class Helper:
         return scpi_cmd
     
         
-    def seperate_aggregated_commands(self, payload):
+    def seperate_aggregated_commands(self, payload: dict) -> dict:
         # This function takes a payload with aggregated commands and seperates them into individual commands
         # We will turn the cli command into the scpi command, check for a ";" seperate the commands and then turn them back into cli commands and add them to the queue
-        new_payload = {}
+        new_payload: dict = {}
         for command, args in payload.items():
-            scpi_cmd = self.cli_to_scpi(command, args)
+            scpi_cmd: str = self.cli_to_scpi(command, args)
             if ";" in scpi_cmd:
-                scpi_commands = scpi_cmd.split(";")
+                scpi_commands: list = scpi_cmd.split(";")
                 for i in range(len(scpi_commands)):
-                    cli_command = self.scpi_to_cli(scpi_commands[i])
+                    cli_command: str = self.scpi_to_cli(scpi_commands[i])
                     if isinstance(args, (list, tuple)) and i < len(args):
                         if cli_command == "set_channel": # if the command is set channel we need to make sure the argument is an integer and not a float since the psu expects an integer for the channel number
                             new_payload[cli_command] = int(args[i])
@@ -58,7 +63,7 @@ class Helper:
         logger.debug(f"Seperated aggregated command: {new_payload}")
         return new_payload
         
-    def scpi_to_cli(self, scpi_cmd):
+    def scpi_to_cli(self, scpi_cmd: str) -> str:
         # This function takes a scpi command and turns it back into a cli command by looking for the scpi command in the dic and returning the corresponding cli command
         for cli_command, scpi_command in self.dic.items():
             if scpi_cmd.startswith(scpi_command.split("{")[0]): # we split the scpi command at the "{" to ignore the arguments when comparing
@@ -66,8 +71,8 @@ class Helper:
                 return cli_command
         raise ValueError(f"Unknown scpi command: {scpi_cmd}")
     
-def make_queue(psu, server):
-    queue = None
+def make_queue(psu: PSU, server: "Server") -> PSUQueue:
+    queue: PSUQueue | None = None
     if psu.name == "k6500":
         queue = K6500Queue(psu=psu, server=server)
     elif psu.name == "hmp4040":

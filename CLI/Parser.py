@@ -1,8 +1,8 @@
 import ordered_argparse
 
 
-def create_base_parser():
-    base = ordered_argparse.ArgumentParser(add_help=False)
+def create_base_parser() -> ordered_argparse.ArgumentParser:
+    base: ordered_argparse.ArgumentParser = ordered_argparse.ArgumentParser(add_help=False)
     base.add_argument(
         "--connect",
         action="store_true",
@@ -98,7 +98,7 @@ def create_base_parser():
 
 class Hmp4040_Parser(ordered_argparse.ArgumentParser):
     def __init__(self):
-        base = create_base_parser()
+        base: ordered_argparse.ArgumentParser = create_base_parser()
 
         super().__init__(
             description="HMP4040 PSU CLI",
@@ -173,7 +173,7 @@ class Hmp4040_Parser(ordered_argparse.ArgumentParser):
 
 class K2400_Parser(ordered_argparse.ArgumentParser):
     def __init__(self):
-        base = create_base_parser()
+        base: ordered_argparse.ArgumentParser = create_base_parser()
         super().__init__(
             description="K2400 PSU CLI",
             parents=[base]
@@ -181,7 +181,7 @@ class K2400_Parser(ordered_argparse.ArgumentParser):
 
 class K2450_Parser(ordered_argparse.ArgumentParser):
     def __init__(self):
-        base = create_base_parser()
+        base: ordered_argparse.ArgumentParser = create_base_parser()
         super().__init__(
             description="K2450 PSU CLI",
             parents=[base]
