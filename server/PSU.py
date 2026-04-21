@@ -35,8 +35,8 @@ class PSU:
                 return float(voltage_str)
             if command == "MEAS:CURR?":
                 current_response = self.resource.query(command)
-                # current_str = current_response.split(",")[1].strip() #for lab testing
-                current_str = current_response.split(",")[0].strip()
+                current_str = current_response.split(",")[1].strip() #for lab testing
+                #current_str = current_response.split(",")[0].strip()
                 return float(current_str)
         else:
             response = self.resource.query(command)

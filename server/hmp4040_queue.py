@@ -51,7 +51,7 @@ class HMP4040Queue(PSUQueue):
 
             logger.info(f"Writing (query) command: {scpi_cmd}")
 
-            last_response = self.psu.query(scpi_cmd)
+            last_response = self.psu.write(scpi_cmd)
             logger.info(f"Response from write (query): {last_response}")
 
             if command == "set_channel":
@@ -73,7 +73,7 @@ class HMP4040Queue(PSUQueue):
         try:
             for channel in range(1, 5):
                 set_channel_cmd = self.dic.get("set_channel").format(channel)
-                self.psu.query(set_channel_cmd)
+                self.psu.write(set_channel_cmd)
                 voltage_cmd = self.dic.get("get_voltage")
                 current_cmd = self.dic.get("get_current")
                 voltage_response = self.psu.query(voltage_cmd)

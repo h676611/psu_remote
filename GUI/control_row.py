@@ -212,7 +212,7 @@ class ControlRow(QtWidgets.QWidget):
                 outp_on = bool(int(float(str(channel_state["output"]))))
                 row["meas_output"].setText("ON" if outp_on else "OFF")
                 row["meas_output"].setStyleSheet(
-                    f"color: {"#00FF08" if outp_on else "#FF1100"}; font-weight: bold;"
+                    f"color: {'#00FF08' if outp_on else '#FF1100'}; font-weight: bold;"
                 )
                 self.rows[index]["on_off_channel_toggle"].setChecked(outp_on)
 
