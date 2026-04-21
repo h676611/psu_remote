@@ -1,6 +1,7 @@
 from .zmq_client import ZMQClient
 import ordered_argparse
 from collections import OrderedDict
+from .helper import process_payload
 
 
 def run_cli(parser_class, psu_name, inargs=None):
@@ -14,7 +15,7 @@ def run_cli(parser_class, psu_name, inargs=None):
 
     request = {
         "name": psu_name,
-        "payload": payload
+        "payload": process_payload(payload)
     }
 
     print(request)
