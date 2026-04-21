@@ -16,7 +16,7 @@ class Server:
         self.socket = self.context.socket(zmq.ROUTER)
         self.socket.bind(address)
         self.psu_queues = {}
-        self.rm = pyvisa.ResourceManager()
+        self.rm = pyvisa.ResourceManager('psu_sims.yaml@sim')  # Load the resource manager with the simulation config
         self.clients = set()
 
         self.config = config
@@ -98,7 +98,6 @@ class Server:
             self.send_error(identity=identity, message="PSU already connected", psu_name=psu_name)
             return
         
-        logger.debug(f'trying to connect {psu_name}')
         if psu_name not in self.config:
             logger.error(f"PSU {psu_name} not in config")
             self.send_error(identity=identity, message="PSU not in config", psu_name=psu_name)
@@ -153,7 +152,6 @@ class Server:
             "status": status,
             "psu_name": psu_name
         }
-        logger.debug(f'Sending status update: {status_message}')
         self.send_response(identity, status_message)
 
 
@@ -172,7 +170,6 @@ class Server:
         self.socket.send_json(response)
 
     def send_status_update_to_all(self, status, psu_name):
-        pass
-        #logger.debug(f'Sending status update to all clients: {status}')
-        #for client in self.clients:
-        #    self.send_status(identity=client, psu_name=psu_name)
+        # pass
+        for client in self.clients:
+           self.send_status(identity=client, psu_name=psu_name)

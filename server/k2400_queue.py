@@ -6,7 +6,7 @@ from logger import setup_logger
 
 logger = setup_logger("K2400queue")
 
-class k2400Queue(PSUQueue):
+class K2400Queue(PSUQueue):
     def __init__(self, psu, server):
         super().__init__(psu, server)
         self.name = "k2400"
@@ -56,11 +56,10 @@ class k2400Queue(PSUQueue):
         try:
             voltage = self.psu.query(self.dic["get_voltage"])
             current = self.psu.query(self.dic["get_current"])
-            output = self.psu.query(self.dic["get_output"])
+
 
             self.status[1]["voltage"] = float(voltage)
             self.status[1]["current"] = float(current)
-            self.status[1]["output"] = int(output)
 
         except Exception as e:
             logger.error(f"Error refreshing status in k2400 queue: {e}")

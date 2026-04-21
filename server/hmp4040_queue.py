@@ -63,6 +63,8 @@ class HMP4040Queue(PSUQueue):
             elif command == "set_output":
                 self.status[self.selected_channel]["output"] = args
 
+            return args
+
         except Exception as e:
             logger.error(f"Error processing command {command} in hmp4040 queue with args {args}: {e}")
             pass
@@ -74,17 +76,13 @@ class HMP4040Queue(PSUQueue):
                 self.psu.query(set_channel_cmd)
                 voltage_cmd = self.dic.get("get_voltage")
                 current_cmd = self.dic.get("get_current")
-                output_cmd = self.dic.get("get_output")
                 voltage_response = self.psu.query(voltage_cmd)
                 current_response = self.psu.query(current_cmd)
-                output_response = self.psu.query(output_cmd)
 
                 if voltage_response is not None and str(voltage_response).strip() != "":
                     self.status[channel]["voltage"] = float(voltage_response)
                 if current_response is not None and str(current_response).strip() != "":
                     self.status[channel]["current"] = float(current_response)
-                if output_response is not None and str(output_response).strip() != "":
-                    self.status[channel]["output"] = int(output_response)
 
         except Exception as e:
             logger.error(f"Error refreshing status for hmp4040: {e}")

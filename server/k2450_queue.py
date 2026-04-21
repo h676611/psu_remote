@@ -55,11 +55,9 @@ class K2450Queue(PSUQueue):
         try:
             voltage = self.psu.query(self.dic["get_voltage"])
             current = self.psu.query(self.dic["get_current"])
-            output = self.psu.query(self.dic["get_output"])
 
             self.status[1]["voltage"] = float(voltage)
             self.status[1]["current"] = float(current)
-            self.status[1]["output"] = int(output)
 
         except Exception as e:
             logger.error(f"Error refreshing status in k2450 queue: {e}")

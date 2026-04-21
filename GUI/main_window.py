@@ -12,8 +12,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("PSU Control GUI")
         self.setGeometry(100, 100, 600, 400)
 
-        self.instrument_names = ["k2400", "k2450"]
-        self.connection_names = ["HV Connection Setup 1", "HV Connection Setup 2"]
+        self.instrument_names = ["hmp4040", "k2400", "k2450", "k6500"]
+        self.connection_names = ["LV Connection", "HV Connection Setup 1", "HV Connection Setup 2", "DMM Connection"]
         self.control_rows = []
 
         # ZMQ Client
@@ -33,8 +33,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.zmq_client.error_received.connect(row.handle_error)
 
         QtCore.QTimer.singleShot(100, self.refresh_all)
-
-
 
 
     def init_ui(self):
@@ -60,5 +58,4 @@ class MainWindow(QtWidgets.QMainWindow):
     def refresh_all(self):
         """Send a refresh request for each connected PSU to update live values."""
         for row in self.control_rows:
-            logger.debug(f'Sending refresh request for {row.instrument_name}')
             row.send_refresh_request()

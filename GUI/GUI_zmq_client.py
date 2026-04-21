@@ -11,7 +11,7 @@ class ZmqClient(QtCore.QObject):
     status_update_received = QtCore.pyqtSignal(dict)
     error_received = QtCore.pyqtSignal(dict)
 
-    def __init__(self, address="tcp://158.37.237.11:5555"):
+    def __init__(self, address="tcp://localhost:5555"):
         super().__init__()
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.DEALER)
@@ -39,9 +39,9 @@ class ZmqClient(QtCore.QObject):
 
                 logger.info(f'received: {msg}')
 
-                if msg_type in ("scpi_reply", "system_reply"):
+                if msg_type in ("system_reply"):
                     self.reply_received.emit(msg)
-                elif msg_type == "status_update":
+                elif msg_type in ("status_update", "scpi_reply"):
                     self.status_update_received.emit(msg)
                 elif msg_type == "error":
                     self.error_received.emit(msg)

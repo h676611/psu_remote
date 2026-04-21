@@ -137,8 +137,6 @@ class ControlRow(QtWidgets.QWidget):
             self.stop()
 
     def start(self):
-
-        # TODO generate request with function
         self._prev_connected = self.connected
         payload = {
             'connect': True
@@ -154,8 +152,6 @@ class ControlRow(QtWidgets.QWidget):
 
 
     def stop(self):
-
-        # TODO generate request with function
         self._prev_connected = self.connected
         payload = {
             'disconnect': True
@@ -169,17 +165,15 @@ class ControlRow(QtWidgets.QWidget):
         self.toggle_button.setText("Start")
         self.connected = False
 
-    @QtCore.pyqtSlot(int, dict)
-    def handle_reply(self, request_id, reply):
+    @QtCore.pyqtSlot(dict)
+    def handle_reply(self, reply):
         if reply.get("name") != self.instrument_name:
             return
-        #logger.info(f"received reply: {reply}")
 
         if reply.get("type") == "refresh_reply":
             self.update_from_refresh(reply["payload"])
             return
 
-        # TODO [KAN-19] handle replies
 
     @QtCore.pyqtSlot(dict)
     def handle_status_update(self, msg):
@@ -187,9 +181,7 @@ class ControlRow(QtWidgets.QWidget):
             return
         logger.info(f'received status update: {msg}')
 
-        # TODO
         status = msg.get("status")
-
 
         if not isinstance(status, dict): # bare håndter dict status payloads og ignorerer alt annet
             logger.error(f"Received status update with invalid format: {status}")
@@ -220,7 +212,7 @@ class ControlRow(QtWidgets.QWidget):
                 outp_on = bool(int(float(str(channel_state["output"]))))
                 row["meas_output"].setText("ON" if outp_on else "OFF")
                 row["meas_output"].setStyleSheet(
-                    f"color: {'#4CAF50' if outp_on else '#F44336'}; font-weight: bold;"
+                    f"color: {"#00FF08" if outp_on else "#FF1100"}; font-weight: bold;"
                 )
                 self.rows[index]["on_off_channel_toggle"].setChecked(outp_on)
 
@@ -238,7 +230,7 @@ class ControlRow(QtWidgets.QWidget):
         error_msg = payload.get("message", "Unknown error")
         self.error_label.setText(f"Error: {error_msg}")
         self.error_label.show()
-        self.connected = self._prev_connected
+        # self.connected = self._prev_connected
         self.toggle_button.setText("Stop" if self.connected else "Start")
 
     # 3. The function that handles the logic
@@ -275,5 +267,4 @@ class ControlRow(QtWidgets.QWidget):
             "name": self.instrument_name,
             "payload": {"refresh": True}
         }
-        logger.debug(f'Sending refresh request: {request}')
         self.send_request.emit(request)
