@@ -38,6 +38,7 @@ class PSU:
                 current_str = current_response.split(",")[1].strip() #for lab testing
                 #current_str = current_response.split(",")[0].strip()
                 return float(current_str)
+            response = self.resource.query(command)
         else:
             response = self.resource.query(command)
             self.logger.info(f"Response: {response}")

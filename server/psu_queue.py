@@ -20,7 +20,11 @@ class PSUQueue:
         self.thread.start()
         
     def add_command(self, identity, payload):
-        payload = self.helper.seperate_aggregated_commands(payload)
+        
+        
+        # TODO fikse på en bedre måte
+        if self.psu.name != "k6500":
+            payload = self.helper.seperate_aggregated_commands(payload)
         self.queue.put((identity, payload))
 
     def worker(self):
@@ -31,7 +35,7 @@ class PSUQueue:
 
             }
             for command, args in payload.items():
-                if any(key.startswith("get") for key in payload): #If it is a get command we query the psu
+                if (command.startswith("get")): #If it is a get command we query the psu
                         last_response = self.handle_get_command(command, args)
                         reply_payload[command] = last_response
                         logger.debug(f"handeling get command: {command}, args: {args}")
@@ -40,6 +44,8 @@ class PSUQueue:
                     logger.debug(f"handeling set command: {command}, args: {args}")
                     reply_payload[command] = self.handle_set_command(command, args)
 
+            # TODO sender bedre response på query i stedet for status update 
+            
             # reply = {
             #     "type": "scpi_reply",
             #     "name": self.name,

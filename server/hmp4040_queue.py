@@ -74,8 +74,8 @@ class HMP4040Queue(PSUQueue):
             for channel in range(1, 5):
                 set_channel_cmd = self.dic.get("set_channel").format(channel)
                 self.psu.write(set_channel_cmd)
-                voltage_cmd = self.dic.get("get_voltage")
-                current_cmd = self.dic.get("get_current")
+                voltage_cmd = self.dic.get("get_display_voltage")
+                current_cmd = self.dic.get("get_display_current")
                 voltage_response = self.psu.query(voltage_cmd)
                 current_response = self.psu.query(current_cmd)
 

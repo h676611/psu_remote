@@ -53,8 +53,8 @@ class K2450Queue(PSUQueue):
     
     def refresh_status(self):
         try:
-            voltage = self.psu.query(self.dic["get_voltage"])
-            current = self.psu.query(self.dic["get_current"])
+            voltage = self.psu.query(self.dic["get_display_voltage"])
+            current = self.psu.query(self.dic["get_display_current"])
 
             self.status[1]["voltage"] = float(voltage)
             self.status[1]["current"] = float(current)

@@ -175,6 +175,7 @@ class ControlRow(QtWidgets.QWidget):
             return
 
 
+    # TODO GUI skal bare vise display current og voltage (source)
     @QtCore.pyqtSlot(dict)
     def handle_status_update(self, msg):
         if msg.get("name") != self.instrument_name:

@@ -36,7 +36,7 @@ class K2400Queue(PSUQueue):
         try:
             scpi_cmd = self.helper.cli_to_scpi(command, args)
 
-            logger.info(f"Writing (query) command: {scpi_cmd}")
+            logger.info(f"Writing command: {scpi_cmd}")
 
             self.psu.write(scpi_cmd)
 
@@ -54,8 +54,8 @@ class K2400Queue(PSUQueue):
     
     def refresh_status(self):
         try:
-            voltage = self.psu.query(self.dic["get_voltage"])
-            current = self.psu.query(self.dic["get_current"])
+            voltage = self.psu.query(self.dic["get_display_voltage"])
+            current = self.psu.query(self.dic["get_display_current"])
 
 
             self.status[1]["voltage"] = float(voltage)

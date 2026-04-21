@@ -46,12 +46,6 @@ class K6500Queue(PSUQueue):
 
     
     def refresh_status(self):
-        try:
-            for channel in range(1, self.num_channels + 1):
-                self.psu.write(self.dic["set_channel"].format(channel))
-                # voltage = self.psu.query(self.dic["get_voltage"])
-                self.status[channel]["voltage"] = 0.0 # Pretend to get voltage from psu because sim does not support querying voltage
-                # self.status[channel]["voltage"] = float(voltage)
-        except Exception as e:
-            logger.error(f"Error refreshing status in k6500 queue: {e}")
-            pass
+        pass
+    
+        
