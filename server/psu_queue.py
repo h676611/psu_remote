@@ -1,6 +1,5 @@
 import threading
 import queue
-from time import sleep
 from logger import setup_logger
 from server.Helper import Helper
 from .Translate import get_dic_for_PSU

@@ -1,10 +1,6 @@
-import threading
-import queue
 from time import sleep
 
-from pyvisa import logger
 from logger import setup_logger
-from server.Helper import Helper
 from server.psu_queue import PSUQueue
 from .Translate import get_dic_for_PSU
 
