@@ -28,6 +28,8 @@ class Helper:
             scpi_cmd = base_scpi.format(*args)
         # argument is single value
         elif isinstance(args, (int, float, str)):
+
+            # maybe convert scientific notation...
             scpi_cmd = base_scpi.format(args)
         
         return scpi_cmd
