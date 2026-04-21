@@ -1,19 +1,15 @@
-import threading
-import queue
-from time import sleep
 
-from pyvisa import logger
-from logger import setup_logger
-from server.Helper import Helper
+
+from server.Translate import get_dic_for_PSU
 from server.psu_queue import PSUQueue
-from .Translate import get_dic_for_PSU
+from logger import setup_logger
 
-logger = setup_logger("K2450queue")
+logger = setup_logger("K2400queue")
 
-class K2450Queue(PSUQueue):
+class k2400Queue(PSUQueue):
     def __init__(self, psu, server):
         super().__init__(psu, server)
-        self.name = "k2450"
+        self.name = "k2400"
         self.dic = get_dic_for_PSU(self.name)
         self.status ={
             1: {
@@ -23,6 +19,7 @@ class K2450Queue(PSUQueue):
             }   
         }
 
+    
     def handle_get_command(self, command, args):
 
         scpi_cmd = self.helper.cli_to_scpi(command, args)
@@ -51,7 +48,7 @@ class K2450Queue(PSUQueue):
                 self.status[1]["output"] = args
 
         except Exception as e:
-            logger.error(f"Error processing command {command} in k2450 queue with args {args}: {e}")
+            logger.error(f"Error processing command {command} in k2400 queue with args {args}: {e}")
             pass
 
     
@@ -66,5 +63,5 @@ class K2450Queue(PSUQueue):
             self.status[1]["output"] = int(output)
 
         except Exception as e:
-            logger.error(f"Error refreshing status in k2450 queue: {e}")
+            logger.error(f"Error refreshing status in k2400 queue: {e}")
             pass
