@@ -30,16 +30,14 @@ class PSUQueue:
             reply_payload = {
 
             }
-
-            if any(key.startswith("get") for key in payload): #If it is a get command we query the psu
-                    for command, args in payload.items():
+            for command, args in payload.items():
+                if any(key.startswith("get") for key in payload): #If it is a get command we query the psu
                         last_response = self.handle_get_command(command, args)
                         reply_payload[command] = last_response
-                        logger.debug(f"handeling get command: {command}++{args}")
+                        logger.debug(f"handeling get command: {command}, args: {args}")
 
-            else: # if it is a set command we just send the command to the psu and then query the state of the psu
-                for command, args in payload.items():
-                    logger.debug(f"handeling set command: {command}++{args}")
+                else: # if it is a set command we just send the command to the psu and then query the state of the psu
+                    logger.debug(f"handeling set command: {command}, args: {args}")
                     reply_payload[command] = self.handle_set_command(command, args)
 
             # reply = {
