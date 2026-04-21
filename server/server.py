@@ -1,7 +1,7 @@
 import pyvisa
 import zmq
 
-from .Helper import Helper
+from .Helper import make_queue
 from .psu_queue import PSUQueue
 from .PSU import PSU
 from logger import setup_logger
@@ -109,7 +109,7 @@ class Server:
         psu.address = address
         psu.connected = True
         self.psus[psu_name] = psu
-        self.psu_queues[psu_name] = Helper.make_queue(psu=psu, server=self)
+        self.psu_queues[psu_name] = make_queue(psu=psu, server=self)
 
         logger.info(f'connected psu: {psu.name}')
 
