@@ -1,6 +1,6 @@
-
 import logger
 from server.Translate import get_dic_for_PSU
+from .server import k6500Queue, hmp4040Queue, k2400Queue, k2450Queue
 
 logger = logger.setup_logger("Helper")
 class Helper:
@@ -60,3 +60,17 @@ class Helper:
                 logger.debug(f'converted command: {cli_command}')
                 return cli_command
         raise ValueError(f"Unknown scpi command: {scpi_cmd}")
+    
+def make_queue(psu, server):
+    queue = None
+    if psu.name == "k6500":
+        queue = k6500Queue(psu=psu, server=server)
+    elif psu.name == "hmp4040":
+        queue = hmp4040Queue(psu=psu, server=server)
+    elif psu.name == "k2400":
+        queue = k2400Queue(psu=psu, server=server)
+    elif psu.name == "k2450":
+        queue = k2450Queue(psu=psu, server=server)
+    else:
+        raise ValueError(f"Unknown PSU name: {psu.name}")
+    return queue
