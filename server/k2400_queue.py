@@ -1,17 +1,21 @@
 
 
+from server import PSU
 from server.Translate import get_dic_for_PSU
 from server.psu_queue import PSUQueue
 from logger import setup_logger
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .server import Server
 
 logger = setup_logger("K2400queue")
 
 class K2400Queue(PSUQueue):
-    def __init__(self, psu, server):
-        super().__init__(psu, server)
-        self.name = "k2400"
-        self.dic = get_dic_for_PSU(self.name)
-        self.status ={
+    def __init__(self, psu: PSU, server: "Server"):
+        super().__init__(psu=psu, server=server)
+        self.name: str = "k2400"
+        self.dic: dict = get_dic_for_PSU(self.name)
+        self.status: dict = {
             1: {
                 "voltage": 0.0,
                 "current": 0.0,
@@ -20,23 +24,23 @@ class K2400Queue(PSUQueue):
         }
 
     
-    def handle_get_command(self, command, args):
+    def handle_get_command(self, command: str, args: list | tuple | None) -> str:
 
-        scpi_cmd = self.helper.cli_to_scpi(command, args)
+        scpi_cmd: str = self.helper.cli_to_scpi(command, args)
     
         logger.info(f"Querying command: {scpi_cmd}")
-        last_response = self.psu.query(scpi_cmd)
+        last_response: str = self.psu.query(scpi_cmd)
 
         logger.info(f"Response: {last_response}")
 
         return last_response
     
 
-    def handle_set_command(self, command, args):
+    def handle_set_command(self, command: str, args: list | tuple | None) -> None:
         try:
-            scpi_cmd = self.helper.cli_to_scpi(command, args)
+            scpi_cmd: str = self.helper.cli_to_scpi(command, args)
 
-            logger.info(f"Writing (query) command: {scpi_cmd}")
+            logger.info(f"Writing command: {scpi_cmd}")
 
             self.psu.write(scpi_cmd)
 
@@ -52,11 +56,10 @@ class K2400Queue(PSUQueue):
             pass
 
     
-    def refresh_status(self):
+    def refresh_status(self) -> None:
         try:
-            voltage = self.psu.query(self.dic["get_voltage"])
-            current = self.psu.query(self.dic["get_current"])
-
+            voltage: str = self.psu.query(self.dic["get_display_voltage"])
+            current: str = self.psu.query(self.dic["get_display_current"])
 
             self.status[1]["voltage"] = float(voltage)
             self.status[1]["current"] = float(current)

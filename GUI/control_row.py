@@ -1,5 +1,3 @@
-import json
-import uuid
 from PyQt5 import QtWidgets, QtCore
 from logger import setup_logger
 
@@ -9,77 +7,77 @@ class ControlRow(QtWidgets.QWidget):
     """A GUI control row for a single instrument, allowing connection management and SCPI command sending."""
     send_request = QtCore.pyqtSignal(dict)
 
-    def __init__(self, instrument_name, row_name, parent=None):
+    def __init__(self, instrument_name: str, row_name: str | None, parent=None):
         super().__init__(parent)
-        self.instrument_name = instrument_name
+        self.instrument_name: str = instrument_name
 
-        self.connected = True
-        self._prev_connected = True
+        self.connected: bool = True
+        self._prev_connected: bool = True
 
-        self.row_name = row_name
+        self.row_name: str | None = row_name
         
         # Main container
-        main_layout = QtWidgets.QVBoxLayout(self)
+        main_layout: QtWidgets.QVBoxLayout = QtWidgets.QVBoxLayout(self)
         
         # 1. Create lists to store your widgets so you can access them later
-        self.rows = [] 
+        self.rows: list = [] 
         
         num_rows = 4 if instrument_name == "hmp4040" else 1
 
 
-        top_layout = QtWidgets.QHBoxLayout()
+        top_layout: QtWidgets.QHBoxLayout = QtWidgets.QHBoxLayout()
 
         main_layout.addLayout(top_layout)
 
-        self.name_label = QtWidgets.QLabel(self.row_name)
+        self.name_label: QtWidgets.QLabel = QtWidgets.QLabel(self.row_name)
         top_layout.addWidget(self.name_label)
 
         # connect button
-        self.toggle_button = QtWidgets.QPushButton(self.connected and "Stop" or "Start")
+        self.toggle_button: QtWidgets.QPushButton = QtWidgets.QPushButton(self.connected and "Stop" or "Start")
         self.toggle_button.clicked.connect(self.on_toggle)
         top_layout.addWidget(self.toggle_button)
 
         # Error display
-        self.error_label = QtWidgets.QLabel()
+        self.error_label: QtWidgets.QLabel = QtWidgets.QLabel()
         self.error_label.setStyleSheet("color: red; font-weight: bold;")
         self.error_label.setWordWrap(True)
         self.error_label.hide()
         main_layout.addWidget(self.error_label)
 
         # Header labels
-        header_layout = QtWidgets.QHBoxLayout()
+        header_layout: QtWidgets.QHBoxLayout = QtWidgets.QHBoxLayout()
 
         main_layout.addLayout(header_layout)
 
-        self.channel_label = QtWidgets.QLabel("Channel")
+        self.channel_label: QtWidgets.QLabel = QtWidgets.QLabel("Channel")
         header_layout.addWidget(self.channel_label)
 
-        self.voltage_label = QtWidgets.QLabel("Voltage [V]")
+        self.voltage_label: QtWidgets.QLabel = QtWidgets.QLabel("Voltage [V]")
         header_layout.addWidget(self.voltage_label)
 
-        self.current_label = QtWidgets.QLabel("Current [A]")
+        self.current_label: QtWidgets.QLabel = QtWidgets.QLabel("Current [A]")
         header_layout.addWidget(self.current_label)
 
-        self.output_label = QtWidgets.QLabel("Output")
+        self.output_label: QtWidgets.QLabel = QtWidgets.QLabel("Output")
         header_layout.addWidget(self.output_label)
 
-        self.send_label = QtWidgets.QLabel("Send")
+        self.send_label: QtWidgets.QLabel = QtWidgets.QLabel("Send")
         header_layout.addWidget(self.send_label)
 
-        self.meas_voltage_label = QtWidgets.QLabel("Meas. V")
+        self.meas_voltage_label: QtWidgets.QLabel = QtWidgets.QLabel("Meas. V")
         header_layout.addWidget(self.meas_voltage_label)
 
-        self.meas_current_label = QtWidgets.QLabel("Meas. A")
+        self.meas_current_label: QtWidgets.QLabel = QtWidgets.QLabel("Meas. A")
         header_layout.addWidget(self.meas_current_label)
 
-        self.meas_output_label = QtWidgets.QLabel("Status")
+        self.meas_output_label: QtWidgets.QLabel = QtWidgets.QLabel("Status")
         header_layout.addWidget(self.meas_output_label)
 
         for i in range(num_rows):
-            row_layout = QtWidgets.QHBoxLayout()
+            row_layout: QtWidgets.QHBoxLayout = QtWidgets.QHBoxLayout()
             
             # Create a dictionary to hold this row's widgets
-            self.row_widgets = {}
+            self.row_widgets: dict[str, QtWidgets.QWidget] = {}
 
             # Label
             label_text = f"{i+1}" if num_rows > 1 else instrument_name
@@ -103,7 +101,7 @@ class ControlRow(QtWidgets.QWidget):
             row_layout.addWidget(self.row_widgets["on_off_channel_toggle"])
 
             # Send Button
-            send_btn = QtWidgets.QPushButton(f"Send")
+            send_btn: QtWidgets.QPushButton = QtWidgets.QPushButton(f"Send")
             
             # 2. Use lambda with a default variable 'row=i' to capture the current index
             send_btn.clicked.connect(
@@ -130,18 +128,18 @@ class ControlRow(QtWidgets.QWidget):
             main_layout.addLayout(row_layout)
 
 
-    def on_toggle(self):
+    def on_toggle(self) -> None:
         if not self.connected:
             self.start()
         else:
             self.stop()
 
-    def start(self):
-        self._prev_connected = self.connected
-        payload = {
+    def start(self) -> None:
+        self._prev_connected: bool = self.connected
+        payload: dict = {
             'connect': True
         }
-        request = {
+        request: dict = {
             'name': self.instrument_name,
             'payload': payload
         }
@@ -151,12 +149,12 @@ class ControlRow(QtWidgets.QWidget):
         self.connected = True
 
 
-    def stop(self):
-        self._prev_connected = self.connected
-        payload = {
+    def stop(self) -> None:
+        self._prev_connected: bool = self.connected
+        payload: dict = {
             'disconnect': True
         }
-        request = {
+        request: dict = {
             'name': self.instrument_name,
             'payload': payload
         }
@@ -166,32 +164,34 @@ class ControlRow(QtWidgets.QWidget):
         self.connected = False
 
     @QtCore.pyqtSlot(dict)
-    def handle_reply(self, reply):
+    def handle_system_reply(self, reply: dict) -> None:
         if reply.get("name") != self.instrument_name:
             return
 
-        if reply.get("type") == "refresh_reply":
-            self.update_from_refresh(reply["payload"])
+        if reply.get("payload", {}).get("connect_GUI") == "OK":
+            # should only be received by the first row, but we check name just in case
+            logger.info(f"GUI connection acknowledged by server for {self.instrument_name}")
             return
 
 
+    # TODO GUI skal bare vise display current og voltage (source)
     @QtCore.pyqtSlot(dict)
-    def handle_status_update(self, msg):
+    def handle_status_update(self, msg: dict) -> None:
         if msg.get("name") != self.instrument_name:
             return
         logger.info(f'received status update: {msg}')
 
-        status = msg.get("status")
+        status: dict = msg.get("status")
 
         if not isinstance(status, dict): # bare håndter dict status payloads og ignorerer alt annet
             logger.error(f"Received status update with invalid format: {status}")
             return
         for index, row in enumerate(self.rows): # gå igjennom kanaler
-            channel = index + 1
+            channel: int = index + 1
             # Server sends channel keys as ints, but JSON may convert to strings
-            channel_state = status.get(channel)
+            channel_state: dict | None = status.get(channel)
             if channel_state is None:
-                channel_state = status.get(str(channel))
+                channel_state: dict | None = status.get(str(channel))
             if not isinstance(channel_state, dict): # skip om kanalen ikke har status
                 continue
             if "voltage" in channel_state:
@@ -212,58 +212,51 @@ class ControlRow(QtWidgets.QWidget):
                 outp_on = bool(int(float(str(channel_state["output"]))))
                 row["meas_output"].setText("ON" if outp_on else "OFF")
                 row["meas_output"].setStyleSheet(
-                    f"color: {"#00FF08" if outp_on else "#FF1100"}; font-weight: bold;"
+                    f"color: {'#00FF08' if outp_on else '#FF1100'}; font-weight: bold;"
                 )
                 self.rows[index]["on_off_channel_toggle"].setChecked(outp_on)
-
-
-
     
     @QtCore.pyqtSlot(dict)
-    def handle_error(self, message):
+    def handle_error(self, message: dict) -> None:
         if message.get("name") != self.instrument_name:
             return
         logger.error(f"received error: {message}")
-        payload = message.get("payload", {})
+        payload: dict = message.get("payload", {})
         if not isinstance(payload, dict):
             payload = {}
-        error_msg = payload.get("message", "Unknown error")
+        error_msg: str = payload.get("message", "Unknown error")
         self.error_label.setText(f"Error: {error_msg}")
         self.error_label.show()
         # self.connected = self._prev_connected
         self.toggle_button.setText("Stop" if self.connected else "Start")
 
     # 3. The function that handles the logic
-    def on_row_submitted(self, row_index, output_checked):
+    def on_row_submitted(self, row_index: int, output_checked: bool) -> None:
         # Access the specific widgets using the row_index
         target_row = self.rows[row_index]
-        v_val = target_row['voltage_input'].value()
-        i_val = target_row['current_input'].value()
-        channel = row_index + 1
-        
-        payload = {}
+        v_val: float = target_row['voltage_input'].value()
+        i_val: float = target_row['current_input'].value()
+        channel: int = row_index + 1
+
+        payload: dict = {
+            'set_voltage': v_val,
+            'set_current': i_val,
+            'set_output': 1 if output_checked else 0
+        }
+
         if self.instrument_name == "hmp4040": 
             payload['set_channel'] = channel
 
-        # TODO [KAN-21] generate request with function
-        payload["set_voltage"] = v_val
-        payload["set_current"] = i_val
-        payload["set_output"] = 1 if output_checked else 0
-
-
-
-
-        request = {
+        request: dict = {
             "name": self.instrument_name,
             "payload": payload
         }
 
         self.send_request.emit(request)
-        
 
-    def send_refresh_request(self):
+    def send_refresh_request(self) -> None:
         """Send a refresh request to query all live values from the PSU."""
-        request = {
+        request: dict = {
             "name": self.instrument_name,
             "payload": {"refresh": True}
         }

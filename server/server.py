@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 import pyvisa
 import zmq
 
@@ -11,21 +13,21 @@ logger = setup_logger(name="server")
 class Server:
     """A server to handle client requests for PSU control via SCPI commands over ZeroMQ."""
 
-    def __init__(self, config, address="tcp://*:5555"):
-        self.context = zmq.Context()
-        self.socket = self.context.socket(zmq.ROUTER)
+    def __init__(self, config: dict, address: str = "tcp://*:5555"):
+        self.context: zmq.Context = zmq.Context()
+        self.socket: zmq.Socket = self.context.socket(zmq.ROUTER)
         self.socket.bind(address)
-        self.psu_queues = {}
-        self.rm = pyvisa.ResourceManager('psu_sims.yaml@sim')  # Load the resource manager with the simulation config
-        self.clients = set()
+        self.psu_queues: dict[str, PSUQueue] = {}
+        self.rm: pyvisa.ResourceManager = pyvisa.ResourceManager('psu_sims.yaml@sim')  # Load the resource manager with the simulation config
+        self.clients: set[bytes] = set()
 
-        self.config = config
+        self.config: dict = config
 
-        self.psus = {}
+        self.psus: dict[str, PSU] = {}
 
-        self.connected_GUIs = set() # contains the identities of connected GUIs to send status updates to
+        self.connected_GUIs: set[bytes] = set() # contains the identities of connected GUIs to send status updates to
 
-    def start(self):
+    def start(self) -> None:
         logger.info("Server started")
 
         logger.info("Connecting to PSUs")
@@ -34,8 +36,8 @@ class Server:
             self.connect_psu(psu_name=name)
 
         while True:
-            identity = self.socket.recv()
-            request = self.socket.recv_json()
+            identity: bytes = self.socket.recv()
+            request: dict = self.socket.recv_json()
 
             try:
                 self.handle_request(identity, request)
@@ -43,10 +45,10 @@ class Server:
                 logger.error(f"Couldn't handle request. error: {e}")
                 self.send_error(identity=identity, message=str(e), psu_name=name)
 
-    def handle_request(self, identity, request):
+    def handle_request(self, identity: bytes, request: dict):
         self.clients.add(identity)
-        payload = request.get("payload", {})
-        psu_name = request.get("name")
+        payload: dict = request.get("payload", {})
+        psu_name: str | None = request.get("name")
 
         logger.info(f"received request: {request}")
 
@@ -61,7 +63,7 @@ class Server:
         self.handle_scpi_command(identity, psu_name, payload)
 
         
-    def handle_system_command(self, identity, command, psu_name=None):
+    def handle_system_command(self, identity: bytes, command: str, psu_name: str | None = None) -> None:
         dispatch = {
             "connect": self.connect_psu,
             "disconnect": self.disconnect_psu,
@@ -70,7 +72,7 @@ class Server:
             "connect_GUI": self.connect_GUI,
         }
 
-        handler = dispatch.get(command)
+        handler: Callable[..., None] = dispatch.get(command)
 
         if not handler:
             self.send_error(identity, f"Unknown system command: {command}", psu_name=psu_name)
@@ -78,16 +80,16 @@ class Server:
 
         handler(identity=identity, psu_name=psu_name)
 
-    def refresh_status(self, identity, psu_name):
+    def refresh_status(self, identity: bytes, psu_name: str) -> None:
         if psu_name not in self.psu_queues:
             self.send_error(identity, "PSU not connected", psu_name=psu_name)
             return
 
-        psu_queue = self.psu_queues[psu_name]
+        psu_queue: PSUQueue = self.psu_queues[psu_name]
         psu_queue.refresh_status()
         self.send_status(identity, psu_name=psu_name)
 
-    def handle_scpi_command(self, identity, psu_name, payload):
+    def handle_scpi_command(self, identity: bytes, psu_name: str , payload: dict) -> None:
         if psu_name not in self.psu_queues:
             self.send_error(identity, "PSU not connected", psu_name=psu_name)
             return
@@ -95,7 +97,7 @@ class Server:
         self.psu_queues[psu_name].add_command(identity, payload)
 
 
-    def connect_psu(self, identity=None, psu_name=None):
+    def connect_psu(self, identity: bytes = None, psu_name: str | None = None) -> None:
         if psu_name in self.psu_queues:
             logger.error(f"PSU {psu_name} already connected")
             self.send_error(identity=identity, message="PSU already connected", psu_name=psu_name)
@@ -105,8 +107,8 @@ class Server:
             logger.error(f"PSU {psu_name} not in config")
             self.send_error(identity=identity, message="PSU not in config", psu_name=psu_name)
             return
-        address = self.config[psu_name]["address"]
-        psu = PSU(self.rm.open_resource(address), name=psu_name)
+        address: str = self.config[psu_name]["address"]
+        psu: PSU = PSU(self.rm.open_resource(address), name=psu_name)
 
         psu.address = address
         psu.connected = True
@@ -116,7 +118,7 @@ class Server:
         logger.info(f'connected psu: {psu.name}')
 
         if identity:
-            reply = {
+            reply: dict = {
                 "type": "system_reply",
                 "name": psu.name,
                 "payload": {
@@ -125,17 +127,17 @@ class Server:
             }
             self.send_response(identity, reply)
     
-    def disconnect_psu(self, identity, psu_name):
+    def disconnect_psu(self, identity: bytes, psu_name: str) -> None:
         if psu_name not in self.psu_queues:
             logger.error(f"PSU {psu_name} not connected")
             self.send_error(identity, "PSU not connected", psu_name=psu_name)
             return
-        psu = self.psus[psu_name]
+        psu: PSU = self.psus[psu_name]
         psu.connected = False
         del self.psu_queues[psu_name]
         logger.info(f'Diconnected PSU {psu.name}')
 
-        reply = {
+        reply: dict = {
             "type": "system_reply",
             "name": psu.name,
             "payload": {
@@ -145,29 +147,37 @@ class Server:
 
         self.send_response(identity, reply)
 
-    def connect_GUI(self, identity, psu_name=None):
+    def connect_GUI(self, identity: bytes, psu_name: str | None = None) -> None:
         self.connected_GUIs.add(identity)
         logger.info(f"Connected GUI with identity {identity}")
 
-    def send_status(self, identity, psu_name):
-        psu = self.psus.get(psu_name)
-        psu_queue = self.psu_queues[psu_name]
+        reply: dict = {
+            "type": "system_reply",
+            "payload": {
+                "connect_GUI": "OK"
+            }
+        }
+        self.send_response(identity, reply)
+
+    def send_status(self, identity: bytes, psu_name: str) -> None:
+        psu: PSU | None = self.psus.get(psu_name)
+        psu_queue: PSUQueue = self.psu_queues[psu_name]
         status = psu_queue.status
-        status_message = {
+        status_message: dict = {
             "type": "status_update",
-            "name": psu.name,
+            "name": psu.name if psu else None,
             "status": status,
             "psu_name": psu_name
         }
         self.send_response(identity, status_message)
 
-    def send_status_to_GUI(self, psu_name):
-        psu = self.psus.get(psu_name)
-        psu_queue = self.psu_queues[psu_name]
+    def send_status_to_GUI(self, psu_name: str) -> None:
+        psu: PSU | None = self.psus.get(psu_name)
+        psu_queue: PSUQueue = self.psu_queues[psu_name]
         status = psu_queue.status
-        status_message = {
+        status_message: dict = {
             "type": "status_update",
-            "name": psu.name,
+            "name": psu.name if psu else None,
             "status": status,
             "psu_name": psu_name
         }
@@ -175,8 +185,8 @@ class Server:
             self.send_response(GUI, status_message)
 
 
-    def send_error(self, identity, message, psu_name):
-        reply = {
+    def send_error(self, identity: bytes, message: str, psu_name: str) -> None:
+        reply: dict = {
             "type": "error",
             "name": psu_name,
             "payload": {
@@ -185,11 +195,11 @@ class Server:
         }
         self.send_response(identity, reply)
 
-    def send_response(self, identity, response):
+    def send_response(self, identity: bytes, response: dict) -> None:
         self.socket.send(identity, zmq.SNDMORE)
         self.socket.send_json(response)
 
-    def send_status_update_to_all(self, status, psu_name):
+    def send_status_update_to_all(self, status: str, psu_name: str) -> None:
         # pass
         for client in self.clients:
            self.send_status(identity=client, psu_name=psu_name)

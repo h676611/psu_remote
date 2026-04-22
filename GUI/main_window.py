@@ -14,11 +14,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.instrument_names = ["hmp4040", "k2400", "k2450", "k6500"]
         self.connection_names = ["LV Connection", "HV Connection Setup 1", "HV Connection Setup 2", "DMM Connection"]
-        self.control_rows = []
+        self.control_rows: list[ControlRow] = []
+
+        self.server_connected: bool = False
 
         # ZMQ Client
-        self.zmq_client = ZmqClient()
-        self.zmq_thread = QtCore.QThread()
+        self.zmq_client: ZmqClient = ZmqClient()
+        self.zmq_thread: QtCore.QThread = QtCore.QThread()
         self.zmq_client.moveToThread(self.zmq_thread)
         self.zmq_thread.start()
 
@@ -32,37 +34,74 @@ class MainWindow(QtWidgets.QMainWindow):
             }
         })
 
+        self.zmq_client.connect_GUI_received.connect(self.handle_connect_GUI_reply)
+
+
         # Connect signals
         for row in self.control_rows:
             row.send_request.connect(self.zmq_client.send)
-            self.zmq_client.reply_received.connect(row.handle_reply)
+            self.zmq_client.system_reply_received.connect(row.handle_system_reply)
             self.zmq_client.status_update_received.connect(row.handle_status_update)
             self.zmq_client.error_received.connect(row.handle_error)
 
-        QtCore.QTimer.singleShot(100, self.refresh_all)
+        if self.server_connected:
+            QtCore.QTimer.singleShot(100, self.refresh_all)
 
 
-    def init_ui(self):
-        central = QtWidgets.QWidget()
+    def init_ui(self) -> None:
+        central: QtWidgets.QWidget = QtWidgets.QWidget()
         self.setCentralWidget(central)
-        layout = QtWidgets.QVBoxLayout(central)
+        layout: QtWidgets.QVBoxLayout = QtWidgets.QVBoxLayout(central)
 
-        self.label = QtWidgets.QLabel("PSU Control Panel")
+        self.label: QtWidgets.QLabel = QtWidgets.QLabel("PSU Control Panel")
         layout.addWidget(self.label)
 
+        # Connect to server button
+        self.connect_button: QtWidgets.QPushButton = QtWidgets.QPushButton("Connect to Server")
+        self.connect_button.clicked.connect(self.connect_to_server)
+        layout.addWidget(self.connect_button)
+
         # Refresh button
-        self.refresh_button = QtWidgets.QPushButton("Refresh All")
+        self.refresh_button: QtWidgets.QPushButton = QtWidgets.QPushButton("Refresh All")
         self.refresh_button.clicked.connect(self.refresh_all)
         layout.addWidget(self.refresh_button)
 
+        # Server connection status
+        self.server_connected_label: QtWidgets.QLabel = QtWidgets.QLabel("Server Disconnected")
+        self.server_connected_label.setStyleSheet("color: red")
+        layout.addWidget(self.server_connected_label)
+
         for i, instrument_name in enumerate(self.instrument_names):
-            row_name = self.connection_names[i] if i < len(self.connection_names) else None
-            row = ControlRow(instrument_name=instrument_name, row_name=row_name)
+            row_name: str | None = self.connection_names[i] if i < len(self.connection_names) else None
+            row: ControlRow = ControlRow(instrument_name=instrument_name, row_name=row_name)
             layout.addWidget(row)
             self.control_rows.append(row)
 
 
-    def refresh_all(self):
+    def refresh_all(self) -> None:
         """Send a refresh request for each connected PSU to update live values."""
         for row in self.control_rows:
             row.send_refresh_request()
+    
+    @QtCore.pyqtSlot(dict)
+    def handle_connect_GUI_reply(self, reply: dict) -> None:
+        if reply.get("payload", {}).get("connect_GUI") == "OK":
+            logger.info("GUI connection acknowledged by server")
+            self.server_connected: bool = True
+            self.server_connected_label.setText("Server Connected")
+            self.server_connected_label.setStyleSheet("color: green")
+            self.refresh_all()
+        else:
+            logger.warning("Received unexpected system reply: {}".format(reply))
+            self.server_connected_label.setText("Server Connection Failed")
+            self.server_connected_label.setStyleSheet("color: red")
+
+
+    def connect_to_server(self) -> None:
+        """Manually trigger a connection to the server (for testing purposes)."""
+        self.zmq_client.send({
+            "type": "system_request",
+            "payload": {
+                "connect_GUI": True
+            }
+        })

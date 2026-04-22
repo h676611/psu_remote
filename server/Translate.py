@@ -1,7 +1,7 @@
 #Bruke denne for å oversette requests fra CLI og GUI over til tilsvarende pyvisa requests
 
-def get_dic_for_PSU(psu_name): 
-    dic = {# Legger til alle PSU og commandoer inn hær
+def get_dic_for_PSU(psu_name: str) -> dict: 
+    dic: dict[str, dict] = {# Legger til alle PSU og commandoer inn hær
         "hmp4040": HMP4040_dic,
         "k2400": K2400_dic,
         "k2450": K2450_dic,
@@ -14,7 +14,7 @@ def get_dic_for_PSU(psu_name):
     raise LookupError(f"can't find dictionary for name {psu_name}")
 
 
-K6500_dic = {
+K6500_dic: dict[str, str] = {
     "get_id": "*IDN?",
     "reset": "*RST",
     "get_voltage": "MEAS:VOLT?",
@@ -23,7 +23,7 @@ K6500_dic = {
     "get_channel_voltage": "ROUT:OPEN:ALL;:ROUT:CLOS (@{});:READ?"
 }
 
-HMP4040_dic = {
+HMP4040_dic: dict[str, str] = {
     #NB: Trailing spaces in these strings are important
     "get_id": "*IDN?",
     "set_channel": "INST OUT{}",
@@ -52,7 +52,7 @@ HMP4040_dic = {
     "get_channel_current": "INST OUT{};MEAS:CURR?",
     "get_channel_voltage": "INST OUT{};MEAS:VOLT?"
 }
-K2400_dic = {
+K2400_dic: dict[str, str] = {
     # Note: Some commands may differ on the 2400 vs. 2450.
     # Adjust them if necessary for your particular 2400 SCPI requirements.
     "get_id": "*IDN?",
@@ -76,7 +76,7 @@ K2400_dic = {
     "get_voltage_limit": "SOUR:CURR:VLIMIT?",
     "set_four_wire_sense": ":SENSe:CURRent:RSENse {}"
 }
-K2450_dic = {
+K2450_dic: dict[str, str] = {
     #NB: Trailing spaces in these strings are important
     "get_id": "*IDN?",
     "get_error": "SYST:ERR?",

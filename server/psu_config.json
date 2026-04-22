@@ -9,7 +9,7 @@
         "address": "USB0::0x05E6::0x2450::04424778::INSTR"
     },
     "k6500": {
-        "address": "USB0::0x05E6::0x6500::04543021:0:INSTR"
+        "address": "USB0::0x05E6::0x6500::04543021::INSTR"
     }
 }
     
