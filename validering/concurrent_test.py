@@ -6,7 +6,7 @@ import time
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from server.psu_queue import PSUQueue
+from server.hmp4040_queue import HMP4040Queue
 
 
 class FakeResource:
@@ -64,6 +64,10 @@ class FakePSU:
 				return f"{channel['voltage']:.2f}"
 			if command == "MEAS:CURR?":
 				return f"{channel['current']:.2f}"
+			if command == "VOLT?":
+				return f"{channel['voltage']:.2f}"
+			if command == "CURR?":
+				return f"{channel['current']:.2f}"
 			if command == "OUTP?":
 				return channel["output"]
 			return "OK"
@@ -72,22 +76,37 @@ class FakePSU:
 class FakeServer:
 	def __init__(self):
 		self._lock = threading.Lock()
-		self.replies = []
+		self.scpi_replies = []
+
+	def send_status(self, identity, psu_name):
+		# No-op for this test: status sends are not part of the atomicity assertion.
+		return
+
+	def send_status_to_GUI(self, psu_name):
+		# No-op for this test: GUI broadcasts are not part of the atomicity assertion.
+		return
 
 	def send_response(self, identity, response):
 		with self._lock:
-			self.replies.append((identity, response))
+			if response.get("type") == "scpi_reply":
+				self.scpi_replies.append((identity, response))
+
+
+class TestHMP4040Queue(HMP4040Queue):
+	def refresh_status(self):
+		# Disable post-command polling to keep write-log assertions focused on payload commands.
+		return
 
 
 def _wait_for_replies(server, expected_count, timeout_s=5.0):
 	deadline = time.time() + timeout_s
 	while time.time() < deadline:
 		with server._lock:
-			if len(server.replies) >= expected_count:
+			if len(server.scpi_replies) >= expected_count:
 				return
 		time.sleep(0.01)
 	raise TimeoutError(
-		f"Timed out waiting for replies. Expected {expected_count}, got {len(server.replies)}"
+		f"Timed out waiting for replies. Expected {expected_count}, got {len(server.scpi_replies)}"
 	)
 
 
@@ -103,7 +122,7 @@ def test_hmp4040_concurrent_set_channel_set_voltage_are_atomic():
 
 	fake_psu = FakePSU(resource_name="ASRL5::INSTR")
 	fake_server = FakeServer()
-	psu_queue = PSUQueue(psu=fake_psu, server=fake_server)
+	psu_queue = TestHMP4040Queue(psu=fake_psu, server=fake_server)
 
 	requests = []
 	request_count = 24
@@ -121,7 +140,7 @@ def test_hmp4040_concurrent_set_channel_set_voltage_are_atomic():
 			"set_channel": channel,
 			"set_voltage": voltage,
 		}
-		psu_queue.add_command(identity, payload, request_id=request_id)
+		psu_queue.add_command(identity, payload)
 
 	producer_threads = []
 	for identity, channel, voltage, request_id in requests:
@@ -165,9 +184,11 @@ def test_hmp4040_concurrent_set_channel_set_voltage_are_atomic():
 		f"Expected pairs: {expected_pairs}. Seen pairs: {set(seen_pairs)}"
 	)
 
-	request_ids = {request_id for _, _, _, request_id in requests}
-	reply_request_ids = {reply["request_id"] for _, reply in fake_server.replies}
-	assert reply_request_ids == request_ids, "Not all requests produced replies"
+	with fake_server._lock:
+		reply_count = len(fake_server.scpi_replies)
+	assert reply_count == request_count, (
+		f"Expected {request_count} SCPI replies, got {reply_count}"
+	)
 
 
 if __name__ == "__main__":

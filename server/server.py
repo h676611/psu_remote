@@ -86,6 +86,10 @@ class Server:
             return
 
         psu_queue: PSUQueue = self.psu_queues[psu_name]
+
+        # TODO add refresh as a command in the queue instead of refreshing directly from server thread
+        # to keep it thread safe (maybe)
+
         psu_queue.refresh_status()
         self.send_status(identity, psu_name=psu_name)
 
