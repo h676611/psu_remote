@@ -102,16 +102,14 @@ class Server:
                 refresh_message["payload"] =  {
                     "set_channel": channel,
                     "get_voltage": True,
-                    "get_current": True,
-                    "get_output": True
+                    "get_current": True
                 }
         else:
             refresh_message: dict = {
                 "name": psu_name,
                 "payload": {
                     "get_voltage": True,
-                    "get_current": True,
-                    "get_output": True
+                    "get_current": True
                 }
             }
         psu_queue.add_command(identity, refresh_message["payload"])
