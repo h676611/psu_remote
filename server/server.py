@@ -90,7 +90,31 @@ class Server:
         # TODO add refresh as a command in the queue instead of refreshing directly from server thread
         # to keep it thread safe (maybe)
 
-        psu_queue.refresh_status()
+        # create message with cli commands for refreshing status
+
+        if psu_name == "HMP4040":
+            refresh_message: dict = {
+                "name": psu_name,
+                "payload": {
+                }
+            }
+            for channel in range(1, 5):
+                refresh_message["payload"] =  {
+                    "set_channel": channel,
+                    "get_voltage": True,
+                    "get_current": True,
+                    "get_output": True
+                }
+        else:
+            refresh_message: dict = {
+                "name": psu_name,
+                "payload": {
+                    "get_voltage": True,
+                    "get_current": True,
+                    "get_output": True
+                }
+            }
+        psu_queue.add_command(identity, refresh_message["payload"])
         self.send_status(identity, psu_name=psu_name)
 
     def handle_scpi_command(self, identity: bytes, psu_name: str , payload: dict) -> None:

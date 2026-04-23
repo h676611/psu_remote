@@ -245,8 +245,12 @@ class ControlRow(QtWidgets.QWidget):
         }
 
         if self.instrument_name == "hmp4040": 
-            payload['set_channel'] = channel
-
+            payload: dict = {
+                'set_channel': channel,
+                'set_voltage': v_val,
+                'set_current': i_val,
+                'set_output': 1 if output_checked else 0
+            }
         request: dict = {
             "name": self.instrument_name,
             "payload": payload
