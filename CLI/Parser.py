@@ -129,6 +129,11 @@ class Hmp4040_Parser(ordered_argparse.ArgumentParser):
             choices=["True", "False", "true", "false", "0", "1"],
             help="Activate output for all channels"
         )
+        self.add_argument(
+            "--get-source",
+            action='store_const',
+            const=''
+        )
 
                 # --- Combined Commands ---
         self.add_argument(
@@ -178,6 +183,21 @@ class K2400_Parser(ordered_argparse.ArgumentParser):
             description="K2400 PSU CLI",
             parents=[base]
         )
+        self.add_argument(
+            "--get-current-range",
+            action='store_const',
+            const=''
+        )
+        self.add_argument(
+            "--get-voltage-range",
+            action='store_const',
+            const=''
+        )
+        self.add_argument(
+            "--get-source",
+            action='store_const',
+            const=''
+        )
 
 class K2450_Parser(ordered_argparse.ArgumentParser):
     def __init__(self):
@@ -194,6 +214,22 @@ class K2450_Parser(ordered_argparse.ArgumentParser):
         
         self.add_argument(
             "--get-voltage-limit",
+            action='store_const',
+            const=''
+        )
+        
+        self.add_argument(
+            "--get-current-range",
+            action='store_const',
+            const=''
+        )
+        self.add_argument(
+            "--get-voltage-range",
+            action='store_const',
+            const=''
+        )
+        self.add_argument(
+            "--get-source",
             action='store_const',
             const=''
         )

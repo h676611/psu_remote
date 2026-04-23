@@ -34,12 +34,24 @@ class PSU:
                 #current_str = current_response.split(",")[0].strip()
                 return float(current_str)
             response: str = self.resource.query(command)
+
         else:
             response: str = self.resource.query(command)
             self.logger.info(f"Response: {response}")
         return response
 
     def write(self, command: str) -> None:
-        self.logger.info(f'writing {command}')
-        self.resource.write(command)
+        if self.name == "k2450" and command.startswith("SOUR:VOLT"):
+            #self.resource.write(command)
+            self.logger.info(f'writing {command};:MEAS:VOLT?')
+            self.resource.query(f"{command};:MEAS:VOLT?")
+        else:
+            self.logger.info(f'writing {command}')
+            self.resource.write(command)
+            
+    
+    def read(self) -> str:
+        buffer = self.resource.read()
+        self.logger.info(f"reading buffer: {buffer}")
+        return buffer
             

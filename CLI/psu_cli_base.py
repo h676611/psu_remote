@@ -15,7 +15,8 @@ def run_cli(parser_class: type, psu_name: str, inargs=None) -> dict:
 
     request: dict = {
         "name": psu_name,
-        "payload": process_payload(payload)
+        #"payload": process_payload(payload)
+        "payload": payload
     }
 
     print(request)

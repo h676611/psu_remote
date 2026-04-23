@@ -32,6 +32,7 @@ HMP4040_dic: dict[str, str] = {
     "set_output": "OUTP {}",
     "set_output_all": "OUTP:GEN {}",
     "set_source": "SOUR FUNC ",
+    "get_source": "SOUR FUNC? ",
     "set_current": "CURR {}",
     "set_voltage": "VOLT {}",
     "get_current": "MEAS:CURR?",
@@ -60,6 +61,7 @@ K2400_dic: dict[str, str] = {
     "set_output": "OUTP {}",
     "set_output_all": "OUTP:GEN {}",
     "set_source": "SOUR:FUNC {}",
+    "get_source": "SOUR:FUNC?",
     "set_autorange": "SOUR:CURR:RANG:AUTO {}",
     "set_current_sense_range": "SENS:CURR:RANGE {}",
     "set_current": "SOUR:CURR {}",
@@ -74,7 +76,9 @@ K2400_dic: dict[str, str] = {
     "get_display_output": "OUTP?",
     "get_current_limit": "SOUR:VOLT:ILIMIT?",
     "get_voltage_limit": "SOUR:CURR:VLIMIT?",
-    "set_four_wire_sense": ":SENSe:CURRent:RSENse {}"
+    "set_four_wire_sense": ":SENSe:CURRent:RSENse {}",
+    "get_current_range": "SOUR:CURR:RANG?",
+    "get_voltage_range": "SOUR:VOLT:RANG?"
 }
 K2450_dic: dict[str, str] = {
     #NB: Trailing spaces in these strings are important
@@ -83,6 +87,7 @@ K2450_dic: dict[str, str] = {
     "set_output": "OUTP {}",
     "set_output_all": "OUTP:GEN {}",
     "set_source": "SOUR:FUNC {}",
+    "get_source": "SOUR:FUNC?",
     "set_autorange": "SOUR:CURR:RANG:AUTO {}",
     "set_current": "SOUR:CURR {}",
     "set_voltage_range": "SOUR:VOLT:RANG {}",
@@ -96,5 +101,7 @@ K2450_dic: dict[str, str] = {
     "get_display_output": "OUTP?",
     "get_current_limit": "SOUR:VOLT:ILIM?",
     "get_voltage_limit": "SOUR:CURR:VLIM?",
-    "set_four_wire_sense": ":SENSe:CURRent:RSENse {}"
+    "set_four_wire_sense": ":SENSe:CURRent:RSENse {}",
+    "get_voltage_range": "SOUR:VOLT:RANG?",
+    "get_current_range": "SOUR:CURR:RANG?",
 }

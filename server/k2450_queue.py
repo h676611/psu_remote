@@ -49,6 +49,8 @@ class K2450Queue(PSUQueue):
                 self.status[1]["current"] = args
             elif command == "set_output":
                 self.status[1]["output"] = args
+                
+            
 
         except Exception as e:
             logger.error(f"Error processing command {command} in k2450 queue with args {args}: {e}")

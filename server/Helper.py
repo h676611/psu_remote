@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 logger = logger.setup_logger("Helper")
 class Helper:
     def __init__(self, PSU: PSU):
-        self.psu: PSU = PSU
+        self.psu = PSU
         self.dic: dict = get_dic_for_PSU(self.psu.name)
 
     def cli_to_scpi(self, command: str, args: list | tuple | None) -> str:

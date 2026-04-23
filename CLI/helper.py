@@ -13,6 +13,8 @@ def process_payload(payload: dict) -> dict:
             print(f"Processing getter command: {key} with value: {value}")
             # For getters, we typically don't have values to process, so we can skip
             return payload
+        elif value =="CURR" or value == "VOLT":
+            return payload
         elif isinstance(value, str):
             # 1. Strip 'A' and 'V' from the ends
             clean_value: str = value.strip("AV")
