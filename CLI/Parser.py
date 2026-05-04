@@ -129,13 +129,9 @@ class Hmp4040_Parser(ordered_argparse.ArgumentParser):
             choices=["True", "False", "true", "false", "0", "1"],
             help="Activate output for all channels"
         )
-        self.add_argument(
-            "--get-source",
-            action='store_const',
-            const=''
-        )
 
-                # --- Combined Commands ---
+        # --- Combined Commands ---
+
         self.add_argument(
                 "--set-channel-voltage",
                 "-scv",

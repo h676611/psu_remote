@@ -66,7 +66,9 @@ class PSUQueue(ABC):
 
                 else: # if it is a set command we just send the command to the psu and then query the state of the psu
                     logger.debug(f"handeling set command: {command}, args: {args}")
-                    reply_payload[command] = self.handle_set_command(command, args)
+                    self.handle_set_command(command, args)
+                    reply_payload[command] = "OK"
+
 
             # TODO sende bedre response på query i stedet for status update 
             
