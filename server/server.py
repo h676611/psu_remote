@@ -18,7 +18,7 @@ class Server:
         self.socket: zmq.Socket = self.context.socket(zmq.ROUTER)
         self.socket.bind(address)
         self.psu_queues: dict[str, PSUQueue] = {}
-        self.rm: pyvisa.ResourceManager = pyvisa.ResourceManager()  # Load the resource manager with the simulation config
+        self.rm: pyvisa.ResourceManager = pyvisa.ResourceManager('psu_sims.yaml@sim')  # Load the resource manager with the simulation config
         self.clients: set[bytes] = set()
 
         self.config: dict = config

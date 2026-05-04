@@ -1,7 +1,8 @@
+import re
+from CLI.helper import CONSTS
 import logger
 from server import PSU
 from server.Translate import get_dic_for_PSU
-from server.psu_queue import PSUQueue
 from .k6500_queue import K6500Queue
 from .hmp4040_queue import HMP4040Queue
 from .k2400_queue import K2400Queue
@@ -9,6 +10,7 @@ from .k2450_queue import K2450Queue
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .server import Server
+    from .psu_queue import PSUQueue
 
 logger = logger.setup_logger("Helper")
 class Helper:
@@ -71,7 +73,7 @@ class Helper:
                 return cli_command
         raise ValueError(f"Unknown scpi command: {scpi_cmd}")
     
-def make_queue(psu: PSU, server: "Server") -> PSUQueue:
+def make_queue(psu: PSU, server: "Server") -> "PSUQueue":
     queue: PSUQueue | None = None
     if psu.name == "k6500":
         queue = K6500Queue(psu=psu, server=server)
