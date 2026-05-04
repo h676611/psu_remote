@@ -2,6 +2,7 @@ import threading
 import queue
 from typing import TYPE_CHECKING
 from logger import setup_logger
+from server.payload import process_payload
 from server.PSU import PSU
 from .Translate import get_dic_for_PSU
 from abc import ABC, abstractmethod
@@ -47,8 +48,10 @@ class PSUQueue(ABC):
     
     def add_command(self, identity: bytes, payload: dict) -> None:
         
-        if self.should_split_aggregated_commands():
-            payload = self.helper.seperate_aggregated_commands(payload)
+        # if self.should_split_aggregated_commands():
+        #     payload = self.helper.seperate_aggregated_commands(payload)
+        payload = process_payload(payload)
+        logger.debug(f"Payload after processing: {payload}")
         self.queue.put((identity, payload))
 
     def worker(self):

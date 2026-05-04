@@ -27,7 +27,6 @@ devices:
           r: "{:d}"
         setter:
           q: "INST OUT{:d}"
-          r: "OK"
         specs:
           valid: [1, 2, 3, 4]
           type: int
@@ -39,7 +38,6 @@ devices:
           r: "{:.2f}"
         setter:
           q: "VOLT {:.2f}"
-          r: OK
         specs:
           min: 0.0
           max: 32.0
@@ -52,7 +50,6 @@ devices:
           r: "{:.2f}"
         setter:
           q: "CURR {:.2f}"
-          r: OK
         specs:
           min: -10.0
           max: 10.0
@@ -65,7 +62,6 @@ devices:
           r: "{:.2f}"
         setter:
           q: "VOLT ILIM {:.2f}"
-          r: OK
         specs:
           min: -10.0
           max: 10.0
@@ -78,7 +74,6 @@ devices:
           r: "{:.2f}"
         setter:
           q: "CURR VLIM {:.2f}"
-          r: OK
         specs:
           min: -10.0
           max: 32.0
@@ -86,12 +81,8 @@ devices:
 
       output:
         default: 0
-        getter:
-          q: "OUTP?"
-          r: "{:d}"
         setter:
           q: "OUTP {:d}"
-          r: OK
         specs:
           valid: [0, 1]
           type: int
@@ -103,7 +94,6 @@ devices:
           r: "{:d}"
         setter:
           q: "OUTP:GEN {:d}"
-          r: OK
         specs:
           valid: [0, 1]
           type: int
@@ -135,7 +125,6 @@ devices:
           q: "OUTP:SEL?"
           r: "{:d}"
 
-
   K2400:
     eom:
       GPIB INSTR:
@@ -153,7 +142,6 @@ devices:
           r: "{:d}"
         setter:
           q: "OUTP {:d}"
-          r: OK
         specs:
           valid: [0, 1]
           type: int
@@ -165,7 +153,6 @@ devices:
           r: "{:.2f}"
         setter:
           q: "SOUR:CURR {:.2f}"
-          r: OK
         specs:
           min: -10.0
           max: 10.0
@@ -178,7 +165,6 @@ devices:
           r: "{:.2f}"
         setter:
           q: "SOUR:VOLT:ILIMIT {:.2f}"
-          r: Ok
         specs:
           min: -10.0
           max: 10.0
@@ -191,7 +177,6 @@ devices:
           r: "{:.2f}"
         setter:
           q: "SOUR:VOLT {:.2f}"
-          r: OK
         specs:
           min: 0.0
           max: 32.0
@@ -204,7 +189,6 @@ devices:
           r: "{:.2f}"
         setter:
           q: "SOUR:CURR:VLIMIT {:.2f}"
-          r: OK
         specs:
           min: 0.0
           max: 32.0
@@ -214,7 +198,6 @@ devices:
         default: "VOLT"
         setter:
           q: "SOUR:FUNC {:s}"
-          r: OK
         specs:
           valid: ["VOLT", "CURR"]
           type: str
@@ -223,7 +206,6 @@ devices:
         default: 1
         setter:
           q: "SOUR:CURR:RANG:AUTO {:d}"
-          r: OK
         specs:
           valid: [0, 1]
           type: int
@@ -232,7 +214,6 @@ devices:
         default: 32.0
         setter:
           q: "SOUR:VOLT:RANG {:.2f}"
-          r: OK
         specs:
           min: 0.0
           max: 32.0
@@ -247,7 +228,7 @@ devices:
           min: 0.0
           max: 32.0
           type: float
-        
+
       display_current:
         default: 0.0
         getter:
@@ -262,7 +243,6 @@ devices:
         default: 0
         setter:
           q: ":SENSE:CURRENT:RSENSE {:d}"
-          r: OK
         specs:
           valid: [0, 1]
           type: int
@@ -378,7 +358,7 @@ devices:
           min: 0.0
           max: 32.0
           type: float
-        
+
       display_current:
         default: 0.0
         getter:
@@ -436,8 +416,6 @@ devices:
           min: 1
           max: 20
           type: int
-
-      
 
 resources:
   ASRL5::INSTR:
