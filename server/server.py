@@ -18,10 +18,11 @@ logger = setup_logger(name="server")
 class Server:
     """A server to handle client requests for PSU control via SCPI commands over ZeroMQ."""
 
-    def __init__(self, config: dict) -> None:
+    def __init__(self, config: dict, simulation: bool = False) -> None:
         self.psu_queues: dict[str, PSUQueue] = {}
-        # self.rm: pyvisa.ResourceManager = pyvisa.ResourceManager("psu_sims.yaml@sim")
-        self.rm: pyvisa.ResourceManager = pyvisa.ResourceManager()
+        
+        self.simulation: bool = simulation
+        self.rm: pyvisa.ResourceManager = pyvisa.ResourceManager("psu_sims.yaml@sim") if simulation else pyvisa.ResourceManager()
         self.config: dict = config
         self.zmq_server: "ZmqServer | None" = None
         self.psus: dict[str, PSU] = {}

@@ -44,8 +44,8 @@ class K2450Queue(PSUQueue):
                 self.status[1]["voltage"] = float(voltage)
                 self.status[1]["output"] = int(output)
                 
-            except AttributeError:
-                logger.error(f"Error parsing response for {command}: {last_response}")
+            except (AttributeError, ValueError) as e:
+                logger.error(f"Error parsing response for {command}: {last_response} - Error: {e}")
 
         logger.debug(f"Status: {self.status}")
         return last_response

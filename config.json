@@ -1,0 +1,25 @@
+{
+    "zmq": {
+        "server_address": "tcp://*:1234",
+        "client_address": "tcp://localhost:1234"
+    },
+    "devices": {
+        "hmp4040": {
+            "address": "ASRL5::INSTR",
+            "display_name": "LV Connection"
+        },
+        "k2400": {
+            "address": "GPIB0::24::INSTR",
+            "display_name": "HV Connection Setup 1"
+        },
+        "k2450": {
+            "address": "USB0::0x05E6::0x2450::04424778::INSTR",
+            "display_name": "HV Connection Setup 2"
+        },
+        "k6500": {
+            "address": "USB0::0x05E6::0x6500::04543021::INSTR",
+            "display_name": "DMM Connection"
+        }
+    },
+    "simulate_psus": true
+}
