@@ -85,6 +85,7 @@ K2450_dic: dict[str, str] = {
     "get_id": "*IDN?",
     "get_error": "SYST:ERR?",
     "set_output": "OUTP {}",
+    "get_output": "OUTP?",
     "set_output_all": "OUTP:GEN {}",
     "set_source": "SOUR:FUNC {}",
     "get_source": "SOUR:FUNC?",
@@ -106,6 +107,6 @@ K2450_dic: dict[str, str] = {
     "get_current_range": "SOUR:CURR:RANG?",
 
     # aggragated commands
-    "get_display_current_voltage": "SOUR:CURR?;:SOUR:VOLT?",
+    "get_display_current_voltage_output": "SOUR:CURR?;:SOUR:VOLT?;:OUTP?",
 
 }

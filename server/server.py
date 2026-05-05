@@ -90,7 +90,7 @@ class Server:
             psu_queue.add_command(None, refresh_payload)
         else:
             refresh_payload = {
-                "get_display_current_voltage": True,
+                "get_display_current_voltage_output": True,
                 "refresh": True
             }
             psu_queue.add_command(None, refresh_payload)

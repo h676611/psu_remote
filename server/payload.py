@@ -11,16 +11,16 @@ def process_payload(payload: dict) -> dict:
             # Getters don't need value processing.
             new_payload[key] = value
             pass
-        if value == "CURR" or value == "VOLT":
+        elif value == "CURR" or value == "VOLT":
             new_payload[key] = value
             pass
-        if key == "set_channel":
+        elif key == "set_channel":
             # For set_channel, we expect an integer channel number.
             try:
                 new_payload[key] = int(value)
             except ValueError:
                 raise ValueError(f"Invalid channel number: {value} for key: {key}")
-        if isinstance(value, str):
+        elif isinstance(value, str):
             # Strip trailing A/V units, then parse optional scale suffix.
             clean_value: str = value.strip("AV")
             match: re.Match = re.fullmatch(r"([\d\.]+)(m|mu|n)?", clean_value)

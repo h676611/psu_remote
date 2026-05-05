@@ -227,7 +227,7 @@ class ControlRow(QtWidgets.QWidget):
                     row["disp_current"].setText(f"{str(channel_state['current']):.3f} A")
                     self.rows[index]["current_input"].setValue(str(channel_state['current']))
             if "output" in channel_state:
-                outp_on = bool(int(float(str(channel_state["output"]))))
+                outp_on = bool((channel_state["output"]))
                 row["meas_output"].setText("ON" if outp_on else "OFF")
                 row["meas_output"].setStyleSheet(
                     f"color: {'#00FF08' if outp_on else '#FF1100'}; font-weight: bold;"
