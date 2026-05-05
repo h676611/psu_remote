@@ -168,7 +168,23 @@ class ControlRow(QtWidgets.QWidget):
         if reply.get("name") != self.instrument_name:
             return
         
+        if reply.get("payload", {}).get("disconnect") == "OK":
+            logger.info(f"Disconnect acknowledged by server for {self.instrument_name}")
+
+            self.connected = False
+            self.toggle_button.setText("Start")
+            logger.info(f"Connection stopped for {self.instrument_name}")
+
+            return
         
+        if reply.get("payload", {}).get("connect") == "OK":
+            logger.info(f"Connect acknowledged by server for {self.instrument_name}")
+
+            self.connected = True
+            self.toggle_button.setText("Stop")
+            logger.info(f"Connection started for {self.instrument_name}")
+
+            return
 
         if reply.get("payload", {}).get("connect_GUI") == "OK":
             # should only be received by the first row, but we check name just in case

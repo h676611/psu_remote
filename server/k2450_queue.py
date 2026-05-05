@@ -38,10 +38,13 @@ class K2450Queue(PSUQueue):
         elif command == "get_display_current":
             self.status[1]["current"] = float(last_response)
         elif command == "get_display_current_voltage":
-            current, voltage = last_response.split(";")
-            self.status[1]["current"] = float(current)
-            self.status[1]["voltage"] = float(voltage)
-            
+            try:
+                current, voltage = last_response.split(";")
+                self.status[1]["current"] = float(current)
+                self.status[1]["voltage"] = float(voltage)
+            except AttributeError:
+                logger.error(f"Error parsing response for {command}: {last_response}")
+
         logger.debug(f"Status: {self.status}")
         return last_response
     

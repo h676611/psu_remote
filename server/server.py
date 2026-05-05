@@ -134,6 +134,8 @@ class Server:
                 }
             }
             self.send_response(identity, reply)
+            self.send_system_to_GUI(reply)
+        
 
     def disconnect_psu(self, identity: bytes, psu_name: str) -> None:
         if psu_name not in self.psu_queues:
