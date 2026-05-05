@@ -94,15 +94,16 @@ class Server:
             refresh_payload = {
                 "get_display_voltage": True,
                 "get_display_current": True,
+                "refresh": True
             }
             psu_queue.add_command(None, refresh_payload)
 
         logger.info(f"Adding refresh command to queue for PSU {psu_name}")
 
-        # wait for the queue to process the refresh command and update the status
-        time.sleep(0.5)
+        # # wait for the queue to process the refresh command and update the status
+        # time.sleep(0.5)
 
-        self.send_status_to_GUI(psu_name=psu_name)
+        # self.send_status_to_GUI(psu_name=psu_name)
 
     def handle_scpi_command(self, identity: bytes, psu_name: str, payload: dict) -> None:
         if psu_name not in self.psu_queues:

@@ -36,10 +36,12 @@ class PSUQueue(ABC):
     def handle_set_command(self, command: str, args: list | tuple | None) -> None:
         """Process a set command for the PSU. Should send the command to the PSU and update internal status accordingly."""
         pass
-    @abstractmethod
+
+
     def refresh_status(self) -> None:
         """Refresh the internal status of the PSU by querying it. Should update the self.status dictionary with the latest values."""
-        pass
+        logger.debug(f"Refreshing status for PSU {self.name}")
+        self.server.send_status_to_GUI(psu_name=self.name)
 
     def should_split_aggregated_commands(self) -> bool:
         """Return whether aggregated CLI commands should be split before queueing."""
@@ -65,6 +67,11 @@ class PSUQueue(ABC):
                         last_response: str = self.handle_get_command(command, args)
                         reply_payload[command] = last_response
                         # logger.debug(f"handeling get command: {command}, args: {args}")
+
+                elif command == "refresh":
+
+                    logger.debug(f"handeling refresh command")
+                    self.refresh_status()
 
                 else: # if it is a set command we just send the command to the psu and then query the state of the psu
                     # logger.debug(f"handeling set command: {command}, args: {args}")
