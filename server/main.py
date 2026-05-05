@@ -3,11 +3,15 @@ import threading
 
 from .server import Server
 from .zmq_server import ZmqServer
+from importlib.resources import files
 
-if __name__ == "__main__":
+def load_config() -> dict:
+    config_path = files("server").joinpath("psu_config.json")
+    with config_path.open("r", encoding="utf8") as file:
+        return json.load(file)
 
-    with open('server/psu_config.json', 'r') as file:
-        config_file = json.load(file)
+def main() -> None:
+    config_file = load_config()
 
     server = Server(config=config_file)
     zmq_server = ZmqServer(server=server)
@@ -23,3 +27,6 @@ if __name__ == "__main__":
             threading.Event().wait(1)
     except KeyboardInterrupt:
         print("Server shutting down...")
+
+if __name__ == '__main__':
+    main()
