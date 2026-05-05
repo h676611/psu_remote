@@ -69,8 +69,7 @@ class PSUQueue(ABC):
                         # logger.debug(f"handeling get command: {command}, args: {args}")
 
                 elif command == "refresh":
-
-                    logger.debug(f"handeling refresh command")
+                    logger.debug(f"handeling refresh command for {self.psu.name}")
                     self.refresh_status()
 
                 else: # if it is a set command we just send the command to the psu and then query the state of the psu

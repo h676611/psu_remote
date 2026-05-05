@@ -30,6 +30,24 @@ class K2400Queue(PSUQueue):
     
         logger.info(f"Querying command: {scpi_cmd}")
         last_response: str = self.psu.query(scpi_cmd)
+        
+        
+        #TODO lag mer elegant
+        if command == "get_display_voltage":
+            self.status[1]["voltage"] = float(last_response)
+        elif command == "get_display_current":
+            self.status[1]["current"] = float(last_response)
+        elif command == "get_display_current_voltage_output":
+            try:
+                current, voltage, output = last_response.split(";")
+                logger.debug(f"current: {current}, voltage: {voltage}, output: {output}")
+                self.status[1]["current"] = float(current)
+                self.status[1]["voltage"] = float(voltage)
+                self.status[1]["output"] = int(output)
+                logger.debug(f"satus: {self.status}")
+                
+            except AttributeError:
+                logger.error(f"Error parsing response for {command}: {last_response}")
 
         logger.info(f"Response: {last_response}")
 
@@ -56,15 +74,3 @@ class K2400Queue(PSUQueue):
             pass
 
     
-    def refresh_status(self) -> None:
-        pass
-        # try:
-        #     voltage: str = self.psu.query(self.dic["get_display_voltage"])
-        #     current: str = self.psu.query(self.dic["get_display_current"])
-
-        #     self.status[1]["voltage"] = float(voltage)
-        #     self.status[1]["current"] = float(current)
-
-        # except Exception as e:
-        #     logger.error(f"Error refreshing status in k2400 queue: {e}")
-        #     pass
