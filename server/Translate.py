@@ -46,12 +46,16 @@ HMP4040_dic: dict[str, str] = {
     "get_voltage_limit": "CURR VLIM?",
     "set_remote": {"mixed": "SYST:MIX", "local": "SYST:LOC",
                     "remote": "SYST:REM"},
-    "set_current_voltage": "CURR {};VOLT {}",
-    "set_channel_voltage": "INST OUT{};VOLT {}",
-    "set_channel_current": "INST OUT{};CURR {}",
-    "set_channel_current_voltage": "INST OUT{};CURR {};VOLT {}",
-    "get_channel_current": "INST OUT{};MEAS:CURR?",
-    "get_channel_voltage": "INST OUT{};MEAS:VOLT?"
+    
+    # aggragated commands
+    
+    "set_current_voltage": "CURR {}\nVOLT {}",
+    "set_channel_voltage": "INST OUT{}\nVOLT {}",
+    "set_channel_current": "INST OUT{}\nCURR {}",
+    "set_channel_current_voltage": "INST OUT{}\nCURR {}\nVOLT {}",
+    "get_channel_display_current": "INST OUT{}\nCURR?",
+    "get_channel_display_voltage": "INST OUT{}\nVOLT?",
+    "get_channel_output": "INST OUT{}\nOUTP?"
 }
 K2400_dic: dict[str, str] = {
     # Note: Some commands may differ on the 2400 vs. 2450.
@@ -59,6 +63,7 @@ K2400_dic: dict[str, str] = {
     "get_id": "*IDN?",
     "get_error": "SYST:ERR?",
     "set_output": "OUTP {}",
+    "get_output": "OUTP?",
     "set_output_all": "OUTP:GEN {}",
     "set_source": "SOUR:FUNC {}",
     "get_source": "SOUR:FUNC?",
@@ -78,7 +83,12 @@ K2400_dic: dict[str, str] = {
     "get_voltage_limit": "SOUR:CURR:VLIMIT?",
     "set_four_wire_sense": ":SENSe:CURRent:RSENse {}",
     "get_current_range": "SOUR:CURR:RANG?",
-    "get_voltage_range": "SOUR:VOLT:RANG?"
+    "get_voltage_range": "SOUR:VOLT:RANG?",
+    
+    
+    # aggragated commands
+    "get_display_current_voltage_output": "SOUR:CURR?;:SOUR:VOLT?;:OUTP?",
+
 }
 K2450_dic: dict[str, str] = {
     #NB: Trailing spaces in these strings are important

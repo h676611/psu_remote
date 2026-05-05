@@ -38,12 +38,30 @@ class HMP4040Queue(PSUQueue):
         }
         self.selected_channel = 1
 
-    def handle_get_command(self, command: str, args: list | tuple | None) -> str:
+    def handle_get_command(self, command: str, args: list | tuple | int | None) -> str:
 
         scpi_cmd: str = self.helper.cli_to_scpi(command, args)
 
         logger.info(f"Querying command: {scpi_cmd}")
         last_response: str = self.psu.query(scpi_cmd)
+        
+        
+        
+        #TODO lag mer elegant
+        if command == "get_display_voltage":
+            self.status[1]["voltage"] = float(last_response)
+        elif command == "get_display_current":
+            self.status[1]["current"] = float(last_response)
+        elif command.startswith("get_channel_"):
+            try:
+                if command.endswith("current"):
+                    self.status[args]["current"] = float(last_response)
+                elif command.endswith("voltage"):
+                    self.status[args]["voltage"] = float(last_response)
+                elif command.endswith("output"):
+                    self.status[args]["output"] = int(last_response)
+            except AttributeError:
+                logger.error(f"Error parsing response for {command}: {last_response}")
 
         logger.info(f"Response: {last_response}")
 
@@ -74,22 +92,3 @@ class HMP4040Queue(PSUQueue):
             logger.error(f"Error processing command {command} in hmp4040 queue with args {args}: {e}")
             pass
         
-    def refresh_status(self) -> None:
-        pass
-        # try:
-        #     for channel in range(1, 5):
-        #         set_channel_cmd: str = self.dic.get("set_channel").format(channel)
-        #         self.psu.write(set_channel_cmd)
-        #         voltage_cmd: str = self.dic.get("get_display_voltage")
-        #         current_cmd: str = self.dic.get("get_display_current")
-        #         voltage_response: str = self.psu.query(voltage_cmd)
-        #         current_response: str = self.psu.query(current_cmd)
-
-        #         if voltage_response is not None and str(voltage_response).strip() != "":
-        #             self.status[channel]["voltage"] = float(voltage_response)
-        #         if current_response is not None and str(current_response).strip() != "":
-        #             self.status[channel]["current"] = float(current_response)
-
-        # except Exception as e:
-        #     logger.error(f"Error refreshing status for hmp4040: {e}")
-        #     pass

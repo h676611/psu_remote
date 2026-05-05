@@ -78,9 +78,10 @@ class Server:
         if psu_name == "hmp4040":
             for channel in range(1, 5):
                 refresh_payload: dict = {
-                    "set_channel": channel,
-                    "get_display_voltage": True,
-                    "get_display_current": True,
+                    "get_channel_display_voltage": channel,
+                    "get_channel_display_current": channel,
+                    "get_channel_output": channel,
+                    "refresh": True
                 }
                 psu_queue.add_command(None, refresh_payload)
         elif psu_name == "k6500":

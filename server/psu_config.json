@@ -1,6 +1,14 @@
 {
+    "hmp4040": {
+        "address": "ASRL5::INSTR"
+    },
+    "k2400": {
+        "address": "GPIB0::24::INSTR"
+    },
     "k2450": {
         "address": "USB0::0x05E6::0x2450::04424778::INSTR"
+    },
+    "k6500": {
+        "address": "USB0::0x05E6::0x6500::04543021::INSTR"
     }
 }
-    
