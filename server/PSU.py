@@ -38,6 +38,15 @@ class PSU:
         else:
             response: str = self.resource.query(command)
         self.logger.debug(f"Received response: {response}")
+
+        # convert response to float if possible
+        try:
+            response_float = float(response)
+            return response_float
+        except ValueError:
+            self.logger.error(f"Response is not a float: {response}")
+            pass
+
         return response
 
     def write(self, command: str) -> None:

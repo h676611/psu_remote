@@ -45,8 +45,7 @@ class PSUQueue(ABC):
         """Return whether aggregated CLI commands should be split before queueing."""
         return True
 
-    
-    def add_command(self, identity: bytes, payload: dict) -> None:
+    def add_command(self, identity: bytes | None, payload: dict) -> None:
         
         # if self.should_split_aggregated_commands():
         #     payload = self.helper.seperate_aggregated_commands(payload)
@@ -80,15 +79,15 @@ class PSUQueue(ABC):
                 "name": self.name,
                 "payload": reply_payload
             }
-
-            self.server.send_response(identity, reply)
+            if identity:
+                self.server.send_response(identity, reply)
 
             # self.refresh_status()
 
             # self.server.send_status(identity, psu_name=self.name)
 
-            # if any(key.startswith("set") for key in payload):
-            #     self.server.send_status_to_GUI(psu_name=self.name)
+            if any(key.startswith("set") for key in payload):
+                self.server.send_status_to_GUI(psu_name=self.name)
 
 
             # self.server.send_status_update_to_all(self.status, psu_name=self.name)

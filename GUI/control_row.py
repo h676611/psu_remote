@@ -64,13 +64,13 @@ class ControlRow(QtWidgets.QWidget):
         self.send_label: QtWidgets.QLabel = QtWidgets.QLabel("Send")
         header_layout.addWidget(self.send_label)
 
-        self.meas_voltage_label: QtWidgets.QLabel = QtWidgets.QLabel("Meas. V")
-        header_layout.addWidget(self.meas_voltage_label)
+        self.display_voltage_label: QtWidgets.QLabel = QtWidgets.QLabel("Disp. V")
+        header_layout.addWidget(self.display_voltage_label)
 
-        self.meas_current_label: QtWidgets.QLabel = QtWidgets.QLabel("Meas. A")
-        header_layout.addWidget(self.meas_current_label)
+        self.display_current_label: QtWidgets.QLabel = QtWidgets.QLabel("Disp. A")
+        header_layout.addWidget(self.display_current_label)
 
-        self.meas_output_label: QtWidgets.QLabel = QtWidgets.QLabel("Status")
+        self.meas_output_label: QtWidgets.QLabel = QtWidgets.QLabel("Output")
         header_layout.addWidget(self.meas_output_label)
 
         for i in range(num_rows):
@@ -111,13 +111,13 @@ class ControlRow(QtWidgets.QWidget):
             row_layout.addWidget(send_btn)
 
             # Measured value labels (read-only live feedback)
-            self.row_widgets['meas_voltage'] = QtWidgets.QLabel("—")
-            self.row_widgets['meas_voltage'].setStyleSheet("color: #2196F3; font-weight: bold;")
-            row_layout.addWidget(self.row_widgets['meas_voltage'])
+            self.row_widgets['disp_voltage'] = QtWidgets.QLabel("—")
+            self.row_widgets['disp_voltage'].setStyleSheet("color: #2196F3; font-weight: bold;")
+            row_layout.addWidget(self.row_widgets['disp_voltage'])
 
-            self.row_widgets['meas_current'] = QtWidgets.QLabel("—")
-            self.row_widgets['meas_current'].setStyleSheet("color: #2196F3; font-weight: bold;")
-            row_layout.addWidget(self.row_widgets['meas_current'])
+            self.row_widgets['disp_current'] = QtWidgets.QLabel("—")
+            self.row_widgets['disp_current'].setStyleSheet("color: #2196F3; font-weight: bold;")
+            row_layout.addWidget(self.row_widgets['disp_current'])
 
             self.row_widgets['meas_output'] = QtWidgets.QLabel("—")
             self.row_widgets['meas_output'].setStyleSheet("color: #888; font-weight: bold;")
@@ -196,17 +196,17 @@ class ControlRow(QtWidgets.QWidget):
                 continue
             if "voltage" in channel_state:
                 try:
-                    row["meas_voltage"].setText(f"{float(channel_state['voltage']):.3f} V")
+                    row["disp_voltage"].setText(f"{float(channel_state['voltage']):.3f} V")
                     self.rows[index]["voltage_input"].setValue(float(channel_state['voltage']))
                 except ValueError:
-                    row["meas_voltage"].setText(f"{str(channel_state['voltage']):.3f} V")
+                    row["disp_voltage"].setText(f"{str(channel_state['voltage']):.3f} V")
                     self.rows[index]["voltage_input"].setValue(str(channel_state['voltage']))
             if "current" in channel_state:
                 try:
-                    row["meas_current"].setText(f"{float(channel_state['current']):.3f} A")
+                    row["disp_current"].setText(f"{float(channel_state['current']):.3f} A")
                     self.rows[index]["current_input"].setValue(float(channel_state['current']))
                 except ValueError:
-                    row["meas_current"].setText(f"{str(channel_state['current']):.3f} V")
+                    row["disp_current"].setText(f"{str(channel_state['current']):.3f} A")
                     self.rows[index]["current_input"].setValue(str(channel_state['current']))
             if "output" in channel_state:
                 outp_on = bool(int(float(str(channel_state["output"]))))

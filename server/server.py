@@ -82,18 +82,18 @@ class Server:
                     "get_voltage": True,
                     "get_current": True,
                 }
-                psu_queue.add_command(identity, refresh_payload)
+                psu_queue.add_command(None, refresh_payload)
         elif psu_name == "k6500":
             refresh_payload = {
                 "get_voltage": True
             }
-            psu_queue.add_command(identity, refresh_payload)
+            psu_queue.add_command(None, refresh_payload)
         else:
             refresh_payload = {
                 "get_voltage": True,
                 "get_current": True,
             }
-            psu_queue.add_command(identity, refresh_payload)
+            psu_queue.add_command(None, refresh_payload)
 
         logger.info(f"Adding refresh command to queue for PSU {psu_name}")
         self.send_status(identity, psu_name=psu_name)
