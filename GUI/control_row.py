@@ -167,6 +167,24 @@ class ControlRow(QtWidgets.QWidget):
     def handle_system_reply(self, reply: dict) -> None:
         if reply.get("name") != self.instrument_name:
             return
+        
+        if reply.get("payload", {}).get("disconnect") == "OK":
+            logger.info(f"Disconnect acknowledged by server for {self.instrument_name}")
+
+            self.connected = False
+            self.toggle_button.setText("Start")
+            logger.info(f"Connection stopped for {self.instrument_name}")
+
+            return
+        
+        if reply.get("payload", {}).get("connect") == "OK":
+            logger.info(f"Connect acknowledged by server for {self.instrument_name}")
+
+            self.connected = True
+            self.toggle_button.setText("Stop")
+            logger.info(f"Connection started for {self.instrument_name}")
+
+            return
 
         if reply.get("payload", {}).get("connect_GUI") == "OK":
             # should only be received by the first row, but we check name just in case
@@ -209,7 +227,7 @@ class ControlRow(QtWidgets.QWidget):
                     row["disp_current"].setText(f"{str(channel_state['current']):.3f} A")
                     self.rows[index]["current_input"].setValue(str(channel_state['current']))
             if "output" in channel_state:
-                outp_on = bool(int(float(str(channel_state["output"]))))
+                outp_on = bool((channel_state["output"]))
                 row["meas_output"].setText("ON" if outp_on else "OFF")
                 row["meas_output"].setStyleSheet(
                     f"color: {'#00FF08' if outp_on else '#FF1100'}; font-weight: bold;"

@@ -13,7 +13,7 @@ logger = setup_logger("ZmqServer")
 
 
 class ZmqServer:
-    def __init__(self, server: "Server", address: str = "tcp://*:5555") -> None:
+    def __init__(self, server: "Server", address: str = "tcp://*:1234") -> None:
         self.server: "Server" = server
         self.context: zmq.Context = zmq.Context()
         self.socket: zmq.Socket = self.context.socket(zmq.ROUTER)
