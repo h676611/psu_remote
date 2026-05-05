@@ -12,8 +12,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("PSU Control GUI")
         self.setGeometry(100, 100, 600, 400)
 
-        self.instrument_names = ["k2450"]
-        self.connection_names = ["HV Connection Setup 2"]
+        self.instrument_names = ["hmp4040", "k2400", "k2450", "k6500"]
+        self.connection_names = ["LV Connection", "HV Connection Setup 1", "HV Connection Setup 2", "DMM Connection"]
         self.control_rows: list[ControlRow] = []
 
         self.server_connected: bool = False

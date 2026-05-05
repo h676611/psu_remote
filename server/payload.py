@@ -23,7 +23,7 @@ def process_payload(payload: dict) -> dict:
         elif isinstance(value, str):
             # Strip trailing A/V units, then parse optional scale suffix.
             clean_value: str = value.strip("AV")
-            match: re.Match = re.fullmatch(r"([\d\.]+)(m|mu|n)?", clean_value)
+            match: re.Match = re.fullmatch(r"([-\d\.]+)(m|mu|n)?", clean_value)
             if match:
                 number_str: str = match.group(1)
                 suffix: str = match.group(2) if match.group(2) else ""
