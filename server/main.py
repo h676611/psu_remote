@@ -1,6 +1,8 @@
-import threading
-from .server import Server
 import json
+import threading
+
+from .server import Server
+from .zmq_server import ZmqServer
 
 if __name__ == "__main__":
 
@@ -8,11 +10,13 @@ if __name__ == "__main__":
         config_file = json.load(file)
 
     server = Server(config=config_file)
+    zmq_server = ZmqServer(server=server)
+    server.set_zmq_server(zmq_server)
 
-    # Optionally start server in its own thread
-    server_thread = threading.Thread(target=server.start, daemon=True)
+    server_thread = threading.Thread(target=zmq_server.run, daemon=True)
     server_thread.start()
 
+    server.start()
 
     try:
         while True:

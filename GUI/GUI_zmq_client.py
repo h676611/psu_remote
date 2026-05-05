@@ -1,5 +1,8 @@
 from PyQt5 import QtCore
-import zmq, threading, time
+import queue
+import threading
+
+import zmq
 from logger import setup_logger
 
 logger = setup_logger(name="zmq_client")
@@ -14,28 +17,40 @@ class ZmqClient(QtCore.QObject):
 
     def __init__(self, address="tcp://localhost:5555"):
         super().__init__()
-        self.context: zmq.Context = zmq.Context()
-        self.socket: zmq.Socket = self.context.socket(zmq.DEALER)
-        self.socket.connect(address)
-
-        # Polling thread for server replies
+        self.address: str = address
         self._running: bool = True
-        self._poll_thread: threading.Thread = threading.Thread(target=self._poll_loop, daemon=True)
-        self._poll_thread.start()
+        self._outbound_messages: queue.Queue[dict] = queue.Queue()
+        self._io_thread: threading.Thread = threading.Thread(target=self._io_loop, daemon=True)
+        self._io_thread.start()
 
     @QtCore.pyqtSlot(dict)
     def send(self, request: dict) -> None:
-
-        self.socket.send_json(request)
-
         logger.info(f"Sending request: {request}")
+        self._outbound_messages.put(request)
 
-    def _poll_loop(self) -> None:
-        poller: zmq.Poller = zmq.Poller() # lag poller for flere sockets
-        poller.register(self.socket, zmq.POLLIN) # følg med DEALER
+    def _io_loop(self) -> None:
+        context: zmq.Context = zmq.Context()
+        socket: zmq.Socket = context.socket(zmq.DEALER)
+        socket.connect(self.address)
+
+        poller: zmq.Poller = zmq.Poller()
+        poller.register(socket, zmq.POLLIN)
+
         while self._running:
+            while True:
+                try:
+                    request: dict = self._outbound_messages.get_nowait()
+                except queue.Empty:
+                    break
+
+                socket.send_json(request)
+
+            events = dict(poller.poll(50))
+            if not events.get(socket):
+                continue
+
             try:
-                msg: dict = self.socket.recv_json(flags=zmq.NOBLOCK)
+                msg: dict = socket.recv_json()
                 msg_type: str = msg.get("type")
 
                 logger.info(f'received: {msg}')
@@ -51,11 +66,12 @@ class ZmqClient(QtCore.QObject):
                     self.error_received.emit(msg)
 
             except zmq.Again:
-                time.sleep(0.01)
+                continue
+
+        socket.close(0)
+        context.term()
 
     def stop(self) -> None:
         self._running = False
-        self._poll_thread.join()
-        self.socket.close()
-        self.context.term()
+        self._io_thread.join()
 
