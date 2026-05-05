@@ -214,14 +214,17 @@ class ControlRow(QtWidgets.QWidget):
                 continue
             if "voltage" in channel_state:
                 try:
-                    row["disp_voltage"].setText(f"{float(channel_state['voltage']):.3f} V")
+                    voltage = float(channel_state['voltage'])
+                    si_prefix_voltage = self.si_prefix(voltage)
+                    row["disp_voltage"].setText(f"{si_prefix_voltage} V")
                     self.rows[index]["voltage_input"].setValue(float(channel_state['voltage']))
                 except ValueError:
                     row["disp_voltage"].setText(f"{str(channel_state['voltage']):.3f} V")
                     self.rows[index]["voltage_input"].setValue(str(channel_state['voltage']))
             if "current" in channel_state:
                 try:
-                    row["disp_current"].setText(f"{float(channel_state['current']):.3f} A")
+                    si_prefix_current = self.si_prefix(float(channel_state['current']))
+                    row["disp_current"].setText(f"{si_prefix_current} A")
                     self.rows[index]["current_input"].setValue(float(channel_state['current']))
                 except ValueError:
                     row["disp_current"].setText(f"{str(channel_state['current']):.3f} A")
@@ -283,3 +286,25 @@ class ControlRow(QtWidgets.QWidget):
             "payload": {"refresh": True}
         }
         self.send_request.emit(request)
+
+    def si_prefix(self, value: float) -> str:
+        """Convert a number to a string with an SI prefix."""
+        import math
+        prefixes = {
+            -12: 'p',
+            -9: 'n',
+            -6: 'µ',
+            -3: 'm',
+             0: '',
+             3: 'k',
+             6: 'M',
+             9: 'G',
+             12: 'T'
+        }
+        if value == 0:
+            return "0"
+        exponent = int(math.floor(math.log10(abs(value)) / 3) * 3)
+        exponent = max(min(exponent, 12), -12)
+        scaled_value = value / (10 ** exponent)
+        prefix = prefixes.get(exponent, '')
+        return f"{scaled_value:.3f} {prefix}"
