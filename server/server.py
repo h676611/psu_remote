@@ -80,8 +80,8 @@ class Server:
             for channel in range(1, 5):
                 refresh_payload: dict = {
                     "set_channel": channel,
-                    "get_voltage": True,
-                    "get_current": True,
+                    "get_display_voltage": True,
+                    "get_display_current": True,
                 }
                 psu_queue.add_command(None, refresh_payload)
         elif psu_name == "k6500":
@@ -91,13 +91,13 @@ class Server:
             psu_queue.add_command(None, refresh_payload)
         else:
             refresh_payload = {
-                "get_voltage": True,
-                "get_current": True,
+                "get_display_voltage": True,
+                "get_display_current": True,
             }
             psu_queue.add_command(None, refresh_payload)
 
         logger.info(f"Adding refresh command to queue for PSU {psu_name}")
-        self.send_status(identity, psu_name=psu_name)
+        self.send_status_to_GUI(psu_name=psu_name)
 
     def handle_scpi_command(self, identity: bytes, psu_name: str, payload: dict) -> None:
         if psu_name not in self.psu_queues:
@@ -192,6 +192,7 @@ class Server:
             "status": status,
             "psu_name": psu_name
         }
+        logger.debug(F"sending status: {status}")
         for gui in self.connected_GUIs:
             self.send_response(gui, status_message)
 

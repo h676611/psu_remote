@@ -3,7 +3,7 @@ import zmq
 
 
 class ZMQClient:
-   def __init__(self, address: str = "tcp://localhost:5555"):
+   def __init__(self, address: str = "tcp://localhost:1234"):
       self.context: zmq.Context = zmq.Context()
       self.socket: zmq.Socket = self.context.socket(zmq.DEALER)
       self.socket.connect(address)

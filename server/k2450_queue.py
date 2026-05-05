@@ -36,7 +36,7 @@ class K2450Queue(PSUQueue):
             self.status[1]["voltage"] = float(last_response)
         elif command == "get_display_current":
             self.status[1]["current"] = float(last_response)
-
+        logger.debug(f"Status: {self.status}")
         return last_response
     
 
