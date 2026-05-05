@@ -2,6 +2,8 @@ from PyQt5 import QtWidgets, QtCore
 from GUI.GUI_zmq_client import ZmqClient
 from GUI.control_row import ControlRow
 from logger import setup_logger
+import json
+
 logger = setup_logger("MainWindow")
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -12,14 +14,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("PSU Control GUI")
         self.setGeometry(100, 100, 600, 400)
 
-        self.instrument_names = ["hmp4040", "k2400", "k2450", "k6500"]
-        self.connection_names = ["LV Connection", "HV Connection Setup 1", "HV Connection Setup 2", "DMM Connection"]
+        # Load config and create ZMQ Client
+        with open('config.json', 'r') as file:
+            config = json.load(file)
+        zmq_address = config.get('zmq', {}).get('client_address', 'tcp://localhost:1234')
+        self.zmq_client: ZmqClient = ZmqClient(address=zmq_address)
+
+        # Load instrument names and display names from config
+        devices = config.get('devices', {})
+        self.instrument_names: list[str] = list(devices.keys())
+        self.connection_names: list[str] = [devices[name].get('display_name', name) for name in self.instrument_names]
         self.control_rows: list[ControlRow] = []
 
         self.server_connected: bool = False
-
-        # ZMQ Client
-        self.zmq_client: ZmqClient = ZmqClient()
 
         # Setup GUI
         self.init_ui()
