@@ -32,10 +32,16 @@ class K2450Queue(PSUQueue):
 
         logger.info(f"Response: {last_response}")
 
+        #TODO lag mer elegant
         if command == "get_display_voltage":
             self.status[1]["voltage"] = float(last_response)
         elif command == "get_display_current":
             self.status[1]["current"] = float(last_response)
+        elif command == "get_display_current_voltage":
+            current, voltage = last_response.split(";")
+            self.status[1]["current"] = float(current)
+            self.status[1]["voltage"] = float(voltage)
+            
         logger.debug(f"Status: {self.status}")
         return last_response
     

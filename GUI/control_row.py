@@ -167,6 +167,8 @@ class ControlRow(QtWidgets.QWidget):
     def handle_system_reply(self, reply: dict) -> None:
         if reply.get("name") != self.instrument_name:
             return
+        
+        
 
         if reply.get("payload", {}).get("connect_GUI") == "OK":
             # should only be received by the first row, but we check name just in case
