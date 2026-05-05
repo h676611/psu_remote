@@ -20,12 +20,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # ZMQ Client
         self.zmq_client: ZmqClient = ZmqClient()
-        self.zmq_thread: QtCore.QThread = QtCore.QThread()
-        self.zmq_client.moveToThread(self.zmq_thread)
-        self.zmq_thread.start()
 
         # Setup GUI
         self.init_ui()
+
+        self.zmq_client.connect_GUI_received.connect(self.handle_connect_GUI_reply)
 
         self.zmq_client.send({
             "type": "system_request",
@@ -33,8 +32,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 "connect_GUI": True
             }
         })
-
-        self.zmq_client.connect_GUI_received.connect(self.handle_connect_GUI_reply)
 
 
         # Connect signals
@@ -44,8 +41,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.zmq_client.status_update_received.connect(row.handle_status_update)
             self.zmq_client.error_received.connect(row.handle_error)
 
-        if self.server_connected:
-            QtCore.QTimer.singleShot(100, self.refresh_all)
+        # if self.server_connected:
+        #     QtCore.QTimer.singleShot(100, self.refresh_all)
 
 
     def init_ui(self) -> None:

@@ -57,7 +57,7 @@ class HMP4040Queue(PSUQueue):
             logger.info(f"Writing (query) command: {scpi_cmd}")
 
             last_response: str = self.psu.write(scpi_cmd)
-            logger.info(f"Response from write (query): {last_response}")
+            # logger.info(f"Response from write (query): {last_response}")
 
             if command == "set_channel":
                 self.selected_channel = args
@@ -75,20 +75,21 @@ class HMP4040Queue(PSUQueue):
             pass
         
     def refresh_status(self) -> None:
-        try:
-            for channel in range(1, 5):
-                set_channel_cmd: str = self.dic.get("set_channel").format(channel)
-                self.psu.write(set_channel_cmd)
-                voltage_cmd: str = self.dic.get("get_display_voltage")
-                current_cmd: str = self.dic.get("get_display_current")
-                voltage_response: str = self.psu.query(voltage_cmd)
-                current_response: str = self.psu.query(current_cmd)
+        pass
+        # try:
+        #     for channel in range(1, 5):
+        #         set_channel_cmd: str = self.dic.get("set_channel").format(channel)
+        #         self.psu.write(set_channel_cmd)
+        #         voltage_cmd: str = self.dic.get("get_display_voltage")
+        #         current_cmd: str = self.dic.get("get_display_current")
+        #         voltage_response: str = self.psu.query(voltage_cmd)
+        #         current_response: str = self.psu.query(current_cmd)
 
-                if voltage_response is not None and str(voltage_response).strip() != "":
-                    self.status[channel]["voltage"] = float(voltage_response)
-                if current_response is not None and str(current_response).strip() != "":
-                    self.status[channel]["current"] = float(current_response)
+        #         if voltage_response is not None and str(voltage_response).strip() != "":
+        #             self.status[channel]["voltage"] = float(voltage_response)
+        #         if current_response is not None and str(current_response).strip() != "":
+        #             self.status[channel]["current"] = float(current_response)
 
-        except Exception as e:
-            logger.error(f"Error refreshing status for hmp4040: {e}")
-            pass
+        # except Exception as e:
+        #     logger.error(f"Error refreshing status for hmp4040: {e}")
+        #     pass

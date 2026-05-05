@@ -23,7 +23,7 @@ class Helper:
 
 
         if base_scpi is None:
-            raise ValueError(f"Unknown command: {command}")
+            raise ValueError(f"Unknown command: {command} for PSU {self.psu.name}")
 
         # No arguments
         if args is None or args == '':

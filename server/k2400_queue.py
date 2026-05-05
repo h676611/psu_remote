@@ -57,13 +57,14 @@ class K2400Queue(PSUQueue):
 
     
     def refresh_status(self) -> None:
-        try:
-            voltage: str = self.psu.query(self.dic["get_display_voltage"])
-            current: str = self.psu.query(self.dic["get_display_current"])
+        pass
+        # try:
+        #     voltage: str = self.psu.query(self.dic["get_display_voltage"])
+        #     current: str = self.psu.query(self.dic["get_display_current"])
 
-            self.status[1]["voltage"] = float(voltage)
-            self.status[1]["current"] = float(current)
+        #     self.status[1]["voltage"] = float(voltage)
+        #     self.status[1]["current"] = float(current)
 
-        except Exception as e:
-            logger.error(f"Error refreshing status in k2400 queue: {e}")
-            pass
+        # except Exception as e:
+        #     logger.error(f"Error refreshing status in k2400 queue: {e}")
+        #     pass

@@ -51,7 +51,7 @@ class PSUQueue(ABC):
         # if self.should_split_aggregated_commands():
         #     payload = self.helper.seperate_aggregated_commands(payload)
         payload = process_payload(payload)
-        logger.debug(f"Payload after processing: {payload}")
+        # logger.debug(f"Payload after processing: {payload}")
         self.queue.put((identity, payload))
 
     def worker(self):
@@ -65,10 +65,10 @@ class PSUQueue(ABC):
                 if (command.startswith("get")): #If it is a get command we query the psu
                         last_response: str = self.handle_get_command(command, args)
                         reply_payload[command] = last_response
-                        logger.debug(f"handeling get command: {command}, args: {args}")
+                        # logger.debug(f"handeling get command: {command}, args: {args}")
 
                 else: # if it is a set command we just send the command to the psu and then query the state of the psu
-                    logger.debug(f"handeling set command: {command}, args: {args}")
+                    # logger.debug(f"handeling set command: {command}, args: {args}")
                     self.handle_set_command(command, args)
                     reply_payload[command] = "OK"
 
@@ -83,12 +83,12 @@ class PSUQueue(ABC):
 
             self.server.send_response(identity, reply)
 
-            self.refresh_status()
+            # self.refresh_status()
 
-            self.server.send_status(identity, psu_name=self.name)
+            # self.server.send_status(identity, psu_name=self.name)
 
-            if any(key.startswith("set") for key in payload):
-                self.server.send_status_to_GUI(psu_name=self.name)
+            # if any(key.startswith("set") for key in payload):
+            #     self.server.send_status_to_GUI(psu_name=self.name)
 
 
             # self.server.send_status_update_to_all(self.status, psu_name=self.name)
