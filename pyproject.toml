@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "psu-control"
+version = "0.1.0"
+description = "Remote control system for laboratory power supplies and instruments"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "PyQt5",
+    "PyQt5-Qt5",
+    "PyQt5_sip",
+    "PyVISA==1.16.1",
+    "PyVISA-sim==0.7.1",
+    "PyYAML==6.0.3",
+    "pyzmq==27.1.0",
+    "stringparser==0.7",
+    "typing_extensions==4.15.0",
+    "ordered_argparse"
+]
+
+[tool.setuptools]
+py-modules = ["logger"]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = [
+    "server",
+    "server.*",
+    "GUI",
+    "GUI.*",
+    "CLI",
+    "CLI.*"
+]
+
+[tool.setuptools.package-data]
+server = ["psu_config.json"]
+
+[project.scripts]
+psu-server = "server.main:main"
+psu-gui = "GUI.app:main"
+psu-hmp4040 = "CLI.hmp4040_remote:main"
+psu-k2400 = "CLI.k2400_remote:main"
+psu-k2450 = "CLI.k2450_remote:main"
+psu-k6500 = "CLI.k6500_remote:main"

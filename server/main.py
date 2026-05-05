@@ -4,13 +4,14 @@ import threading
 from .server import Server
 from .zmq_server import ZmqServer
 
-if __name__ == "__main__":
+def main() -> None:
 
     with open('config.json', 'r') as file:
         config_file = json.load(file)
 
     # Extract device config for Server
     device_config = config_file.get('devices', {})
+
     print(f'simulation: {config_file.get("simulate_psus", False)}')
     server = Server(config=device_config, simulation=config_file.get('simulate_psus', False))
     
@@ -29,3 +30,6 @@ if __name__ == "__main__":
             threading.Event().wait(1)
     except KeyboardInterrupt:
         print("Server shutting down...")
+
+if __name__ == '__main__':
+    main()
