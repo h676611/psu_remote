@@ -19,7 +19,8 @@ class Server:
 
     def __init__(self, config: dict) -> None:
         self.psu_queues: dict[str, PSUQueue] = {}
-        self.rm: pyvisa.ResourceManager = pyvisa.ResourceManager("psu_sims.yaml@sim")
+        # self.rm: pyvisa.ResourceManager = pyvisa.ResourceManager("psu_sims.yaml@sim")
+        self.rm: pyvisa.ResourceManager = pyvisa.ResourceManager()
         self.clients: set[bytes] = set()
         self.config: dict = config
         self.zmq_server: "ZmqServer | None" = None
