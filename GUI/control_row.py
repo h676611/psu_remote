@@ -103,23 +103,27 @@ class ControlRow(QtWidgets.QWidget):
         self.channel_label: QtWidgets.QLabel = QtWidgets.QLabel("Channel")
         header_layout.addWidget(self.channel_label)
 
-        self.voltage_label: QtWidgets.QLabel = QtWidgets.QLabel("Voltage")
-        header_layout.addWidget(self.voltage_label)
+        if "voltage" in self.config["fields"]:
 
-        self.si_prefix_voltage_label: QtWidgets.QLabel = QtWidgets.QLabel("SI")
-        header_layout.addWidget(self.si_prefix_voltage_label)
+            self.voltage_label: QtWidgets.QLabel = QtWidgets.QLabel("Voltage")
+            header_layout.addWidget(self.voltage_label)
 
-        self.current_label: QtWidgets.QLabel = QtWidgets.QLabel("Current")
-        header_layout.addWidget(self.current_label)
+            self.si_prefix_voltage_label: QtWidgets.QLabel = QtWidgets.QLabel("SI")
+            header_layout.addWidget(self.si_prefix_voltage_label)
+        if "current" in self.config["fields"]:
+                
+            self.current_label: QtWidgets.QLabel = QtWidgets.QLabel("Current")
+            header_layout.addWidget(self.current_label)
 
-        self.si_prefix_current_label: QtWidgets.QLabel = QtWidgets.QLabel("SI")
-        header_layout.addWidget(self.si_prefix_current_label)
+            self.si_prefix_current_label: QtWidgets.QLabel = QtWidgets.QLabel("SI")
+            header_layout.addWidget(self.si_prefix_current_label)
 
-        self.output_label: QtWidgets.QLabel = QtWidgets.QLabel("Output")
-        header_layout.addWidget(self.output_label)
+        if "output" in self.config["fields"]:
+            self.output_label: QtWidgets.QLabel = QtWidgets.QLabel("Output")
+            header_layout.addWidget(self.output_label)
 
-        self.send_label: QtWidgets.QLabel = QtWidgets.QLabel("Send")
-        header_layout.addWidget(self.send_label)
+            self.send_label: QtWidgets.QLabel = QtWidgets.QLabel("Send")
+            header_layout.addWidget(self.send_label)
 
         self.display_voltage_label: QtWidgets.QLabel = QtWidgets.QLabel("Disp. V")
         header_layout.addWidget(self.display_voltage_label)
@@ -132,9 +136,9 @@ class ControlRow(QtWidgets.QWidget):
 
         num_rows = self.config["num_channels"]
         for i in range(num_rows):
-            self._create_control_row(i, num_rows)
+            self._create_control_row(i, num_rows, self.config["fields"])
 
-    def _create_control_row(self, row_index: int, total_rows: int) -> None:
+    def _create_control_row(self, row_index: int, total_rows: int, fields: list) -> None:
         """Create a single control row with voltage, current, and output widgets."""
         main_layout = self.layout()
         row_layout = QtWidgets.QHBoxLayout()
@@ -147,39 +151,42 @@ class ControlRow(QtWidgets.QWidget):
         row_widgets['label'] = QtWidgets.QLabel(label_text)
         row_layout.addWidget(row_widgets['label'])
 
-        # Voltage Input
-        row_widgets['voltage_input'] = QtWidgets.QDoubleSpinBox()
-        row_widgets['voltage_input'].setSuffix(' V')
-        row_widgets['voltage_input'].setRange(-100., 100.)
-        row_layout.addWidget(row_widgets['voltage_input'])
+        if "voltage" in fields:
+            # Voltage Input
+            row_widgets['voltage_input'] = QtWidgets.QDoubleSpinBox()
+            row_widgets['voltage_input'].setSuffix(' V')
+            row_widgets['voltage_input'].setRange(-100., 100.)
+            row_layout.addWidget(row_widgets['voltage_input'])
 
-        # SI prefix for voltage
-        row_widgets['SI_prefix_voltage'] = StepperOnlyBox()
-        row_widgets['SI_prefix_voltage'].setItems(['', 'm', 'mu', 'n'])
-        row_layout.addWidget(row_widgets['SI_prefix_voltage'])
+            # SI prefix for voltage
+            row_widgets['SI_prefix_voltage'] = StepperOnlyBox()
+            row_widgets['SI_prefix_voltage'].setItems(['', 'm', 'mu', 'n'])
+            row_layout.addWidget(row_widgets['SI_prefix_voltage'])
 
-        # Current Input
-        row_widgets['current_input'] = QtWidgets.QDoubleSpinBox()
-        row_widgets['current_input'].setSuffix(' A')
-        row_widgets['current_input'].setRange(-10., 10.)
-        row_layout.addWidget(row_widgets['current_input'])
+        if "current" in fields:
+            # Current Input
+            row_widgets['current_input'] = QtWidgets.QDoubleSpinBox()
+            row_widgets['current_input'].setSuffix(' A')
+            row_widgets['current_input'].setRange(-10., 10.)
+            row_layout.addWidget(row_widgets['current_input'])
 
-        # SI prefix for current
-        row_widgets['SI_prefix_current'] = StepperOnlyBox()
-        row_widgets['SI_prefix_current'].setItems(['', 'm', 'mu', 'n'])
-        row_layout.addWidget(row_widgets['SI_prefix_current'])
+            # SI prefix for current
+            row_widgets['SI_prefix_current'] = StepperOnlyBox()
+            row_widgets['SI_prefix_current'].setItems(['', 'm', 'mu', 'n'])
+            row_layout.addWidget(row_widgets['SI_prefix_current'])
 
-        # Output on/off
-        row_widgets['on_off_channel_toggle'] = QtWidgets.QCheckBox()
-        row_layout.addWidget(row_widgets["on_off_channel_toggle"])
+        if "output" in fields:
+            # Output on/off
+            row_widgets['on_off_channel_toggle'] = QtWidgets.QCheckBox()
+            row_layout.addWidget(row_widgets["on_off_channel_toggle"])
 
-        # Send Button
-        send_btn: QtWidgets.QPushButton = QtWidgets.QPushButton(f"Send")
-        send_btn.clicked.connect(
-            lambda checked, row=row_index, toggle=row_widgets["on_off_channel_toggle"]:
-                self.on_row_submitted(row, toggle.isChecked())
-        )
-        row_layout.addWidget(send_btn)
+            # Send Button
+            send_btn: QtWidgets.QPushButton = QtWidgets.QPushButton(f"Send")
+            send_btn.clicked.connect(
+                lambda checked, row=row_index, toggle=row_widgets["on_off_channel_toggle"]:
+                    self.on_row_submitted(row, toggle.isChecked())
+            )
+            row_layout.addWidget(send_btn)
 
         # Measured value labels (read-only live feedback)
         row_widgets['disp_voltage'] = QtWidgets.QLabel("—")

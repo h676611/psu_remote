@@ -216,3 +216,20 @@ class Server:
     def send_system_to_GUI(self, reply):
          for gui in self.connected_GUIs:
             self.send_response(gui, reply)
+
+
+    def check_psu_addresses(self) -> None:
+        """On startup, check if PSUs in config are on the correct addresses."""
+
+        for address in self.config.values():
+            if self.simulation:
+                logger.info(f"Simulated PSU at {address} is ready")
+            else:
+                logger.info(f"Checking connection to PSU at {address}")
+                try:
+                    resource = self.rm.open_resource(address)
+                    response = resource.query("*IDN?")
+                    if response:
+                        logger.info(f"Successfully connected to PSU at {address}: {response.strip()}")
+                except Exception as e:
+                    logger.error(f"Failed to connect to PSU at {address}: {e}")
