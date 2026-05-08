@@ -233,3 +233,5 @@ class Server:
                         logger.info(f"Successfully connected to PSU at {address}: {response.strip()}")
                 except Exception as e:
                     logger.error(f"Failed to connect to PSU at {address}: {e}")
+
+    

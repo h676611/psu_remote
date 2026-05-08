@@ -13,6 +13,7 @@ logger = setup_logger("K6500queue")
 class K6500Queue(PSUQueue):
     def __init__(self, psu: PSU, server: "Server"):
         super().__init__(psu=psu, server=server)
+        self.server = server
         self.name: str = "k6500"
         self.dic: dict = get_dic_for_PSU(self.name)
         self.num_channels: int = 10
@@ -30,6 +31,8 @@ class K6500Queue(PSUQueue):
         last_response: str = self.psu.query(scpi_cmd)
 
         logger.info(f"Response: {last_response}")
+
+        self.server.send_status_to_GUI(psu_name=self.name)
 
         return last_response
     
