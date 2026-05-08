@@ -29,6 +29,14 @@ class K6500Queue(PSUQueue):
     
         logger.info(f"Querying command: {scpi_cmd}")
         last_response: str = self.psu.query(scpi_cmd)
+        
+        if command == "get_channel_voltage":
+            channel: int = int(args)
+            try:
+                self.status[channel]["voltage"] = float(last_response)
+            except (ValueError, TypeError) as e:
+                self.status[channel]["voltage"] = last_response
+                logger.error(f"Error parsing response for {command} with args {args}: {last_response} - Error: {e}")
 
         logger.info(f"Response: {last_response}")
 
