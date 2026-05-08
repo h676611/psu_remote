@@ -99,6 +99,12 @@ def create_base_parser() -> ordered_argparse.ArgumentParser:
         '--set-source',
         help='Set source function'
     )
+
+    base.add_argument(
+        '--verbose', '-v',
+        action='store_true',
+        help='Prints full response from server, including all metadata. Useful for debugging.'
+    )
     return base
     
 

@@ -1,10 +1,12 @@
+import json
+
 from .zmq_client import ZMQClient
 import ordered_argparse
 from collections import OrderedDict
 from .helper import process_payload
 
 
-def run_cli(parser_class: type, psu_name: str, inargs=None) -> dict:
+def run_cli(parser_class: type, psu_name: str, inargs=None) -> dict | None:
     parser: ordered_argparse.ArgumentParser = parser_class()
     args: ordered_argparse.OrderedNamespace = parser.parse_args(inargs, namespace=ordered_argparse.OrderedNamespace())
 
@@ -12,16 +14,19 @@ def run_cli(parser_class: type, psu_name: str, inargs=None) -> dict:
         (k, v) for k, v in args.ordered()
         if v is not None and v is not False
     )
+    # remove key for verbose flag if it exists
+    verbose = payload.pop("verbose", False)
+
 
     request: dict = {
         "name": psu_name,
-        #"payload": process_payload(payload)
         "payload": payload
     }
 
-    print(request)
-
-    zmq_client: ZMQClient = ZMQClient()
+    with open('config.json', 'r') as file:
+        config_file = json.load(file)
+    address = config_file.get('zmq', {}).get('client_address', 'tcp://10.0.0.2:5555')
+    zmq_client: ZMQClient = ZMQClient(address=address)
     try:
         reply: dict = zmq_client.send_receive(request)
     except KeyboardInterrupt:
@@ -31,6 +36,27 @@ def run_cli(parser_class: type, psu_name: str, inargs=None) -> dict:
         }
     finally:
         zmq_client.close()
-    print(reply)
 
-    return reply
+
+    value = None
+    for command, response in reply.get("payload", {}).items():
+        if command.startswith("get"):
+            try:
+                value = float(response)
+            except (ValueError, TypeError):
+                value = response
+        else:
+            value = response
+
+
+    if verbose:
+        name = request.get("name", "unknown")
+        payload = request.get("payload", {})
+        cmd = payload.keys()
+        for cmd in payload.keys():
+            print(f'{name}: {cmd} -> {value}')
+
+    if type(value) == float:
+        return value
+    else:
+        return None
