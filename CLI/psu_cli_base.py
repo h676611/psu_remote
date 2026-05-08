@@ -45,6 +45,7 @@ def run_cli(parser_class: type, psu_name: str, inargs=None) -> dict | None:
 
 
     value = None
+    set_cmd = False
     for command, response in reply.get("payload", {}).items():
         if command.startswith("get"):
             try:
@@ -53,6 +54,8 @@ def run_cli(parser_class: type, psu_name: str, inargs=None) -> dict | None:
                 value = response
         else:
             value = response
+        if command.startswith("set"):
+            set_cmd = True
 
 
     if verbose:
@@ -62,7 +65,7 @@ def run_cli(parser_class: type, psu_name: str, inargs=None) -> dict | None:
         for cmd in payload.keys():
             print(f'{name}: {cmd} -> {value}')
 
-    if type(value) == float:
-        return value
-    else:
+    if set_cmd:
         return None
+
+    return value
