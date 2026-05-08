@@ -63,7 +63,7 @@ class FieldHandler:
             # Update display
             row[self.display_key].setText(f"{scaled:.3f} {prefix} {self.suffix}".strip())
         except (ValueError, TypeError) as e:
-            logger.error(f"Error {e} parsing {self.field_name} value: {value}")
+            # logger.error(f"Error {e} parsing {self.field_name} value: {value}")
             row[self.display_key].setText(str(value))
 
 
