@@ -46,10 +46,11 @@ class FieldHandler:
             row[self.display_key].setText(f"{scaled:.3f} {prefix} {self.suffix}".strip())
             
             # Update prefix selector
-            row[self.prefix_key].setCurrentIndex(SI_PREFIX_MAPPING.get(prefix, 0))
+            if prefix in SI_PREFIX_MAPPING:
+                row[self.prefix_key].setCurrentIndex(SI_PREFIX_MAPPING.get(prefix, 0))
             
-            # Update input spinbox
-            row[self.input_key].setValue(scaled)
+                # Update input spinbox
+                row[self.input_key].setValue(scaled)
         except (ValueError, TypeError) as e:
             logger.error(f"Error {e} parsing {self.field_name} value: {value}")
             row[self.display_key].setText(str(value))
@@ -293,12 +294,12 @@ class ControlRow(QtWidgets.QWidget):
             if not isinstance(channel_state, dict):
                 continue
             
-            # Update voltage if present
-            if "voltage" in channel_state:
+            # Update voltage if present and supported by instrument
+            if "voltage" in self.config["fields"] and "voltage" in channel_state:
                 voltage_handler.parse_and_update(row, channel_state['voltage'], si_prefix)
             
-            # Update current if present
-            if "current" in channel_state:
+            # Update current if present and supported by instrument
+            if "current" in self.config["fields"] and "current" in channel_state:
                 current_handler.parse_and_update(row, channel_state['current'], si_prefix)
             
             # Update output state
