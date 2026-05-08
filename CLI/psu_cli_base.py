@@ -27,7 +27,7 @@ def run_cli(parser_class: type, psu_name: str, inargs=None) -> None:
     try:
         with open('config.json', 'r') as file:
             config_file = json.load(file)
-    except FileNotFoundError:
+    except Exception:
         pass
 
 
