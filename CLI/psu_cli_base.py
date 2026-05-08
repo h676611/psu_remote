@@ -64,6 +64,8 @@ def run_cli(parser_class: type, psu_name: str, inargs=None) -> dict | None:
         cmd = payload.keys()
         for cmd in payload.keys():
             print(f'{name}: {cmd} -> {value}')
+    elif not set_cmd:
+        print(value)
 
     if set_cmd:
         return None
