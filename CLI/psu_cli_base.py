@@ -31,9 +31,7 @@ def run_cli(parser_class: type, psu_name: str, inargs=None) -> dict | None:
         pass
 
 
-    
     address = config_file.get('zmq', {}).get('client_address', 'tcp://10.0.0.2:5555')
-    print(address)
     zmq_client: ZMQClient = ZMQClient(address=address)
     try:
         reply: dict = zmq_client.send_receive(request)
