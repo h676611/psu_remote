@@ -55,6 +55,17 @@ class FieldHandler:
             logger.error(f"Error {e} parsing {self.field_name} value: {value}")
             row[self.display_key].setText(str(value))
 
+    def parse_and_update_display_only(self, row: dict, value: str | float, si_prefix_fn):
+        try:
+            numeric_value = float(value)
+            scaled, prefix = si_prefix_fn(numeric_value)
+            
+            # Update display
+            row[self.display_key].setText(f"{scaled:.3f} {prefix} {self.suffix}".strip())
+        except (ValueError, TypeError) as e:
+            logger.error(f"Error {e} parsing {self.field_name} value: {value}")
+            row[self.display_key].setText(str(value))
+
 
 
 class ControlRow(QtWidgets.QWidget):
@@ -297,10 +308,14 @@ class ControlRow(QtWidgets.QWidget):
             # Update voltage if present and supported by instrument
             if "voltage" in self.config["fields"] and "voltage" in channel_state:
                 voltage_handler.parse_and_update(row, channel_state['voltage'], si_prefix)
+            else:
+                voltage_handler.parse_and_update_display_only(row, channel_state.get('voltage', '—'), si_prefix)
             
             # Update current if present and supported by instrument
             if "current" in self.config["fields"] and "current" in channel_state:
                 current_handler.parse_and_update(row, channel_state['current'], si_prefix)
+            else:
+                current_handler.parse_and_update_display_only(row, channel_state.get('current', '—'), si_prefix)
             
             # Update output state
             if "output" in channel_state:
