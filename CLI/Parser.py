@@ -300,6 +300,12 @@ class K6500_Parser(ordered_argparse.ArgumentParser):
             help='Get all closed channels on the multimeter'
         )
 
+        self.add_argument(
+            '--verbose', '-v',
+            action='store_true',
+            help='Prints full response from server, including all metadata. Useful for debugging.'
+        )
+
 
 
        

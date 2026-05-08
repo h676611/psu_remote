@@ -23,9 +23,17 @@ def run_cli(parser_class: type, psu_name: str, inargs=None) -> dict | None:
         "payload": payload
     }
 
-    with open('config.json', 'r') as file:
-        config_file = json.load(file)
+    # relative import of config file to get zmq address
+    try:
+        with open('config.json', 'r') as file:
+            config_file = json.load(file)
+    except FileNotFoundError:
+        pass
+
+
+    
     address = config_file.get('zmq', {}).get('client_address', 'tcp://10.0.0.2:5555')
+    print(address)
     zmq_client: ZMQClient = ZMQClient(address=address)
     try:
         reply: dict = zmq_client.send_receive(request)
