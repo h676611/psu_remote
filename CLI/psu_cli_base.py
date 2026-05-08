@@ -3,10 +3,10 @@ import json
 from .zmq_client import ZMQClient
 import ordered_argparse
 from collections import OrderedDict
-from .helper import process_payload
+from .helper import process_reply
 
 
-def run_cli(parser_class: type, psu_name: str, inargs=None) -> dict | None:
+def run_cli(parser_class: type, psu_name: str, inargs=None) -> None:
     parser: ordered_argparse.ArgumentParser = parser_class()
     args: ordered_argparse.OrderedNamespace = parser.parse_args(inargs, namespace=ordered_argparse.OrderedNamespace())
 
@@ -43,31 +43,11 @@ def run_cli(parser_class: type, psu_name: str, inargs=None) -> dict | None:
     finally:
         zmq_client.close()
 
-
-    value = None
-    set_cmd = False
-    for command, response in reply.get("payload", {}).items():
-        if command.startswith("get"):
-            try:
-                value = float(response)
-            except (ValueError, TypeError):
-                value = response
-        else:
-            value = response
-        if command.startswith("set"):
-            set_cmd = True
-
+    cmd, value = process_reply(reply)
 
     if verbose:
-        name = request.get("name", "unknown")
-        payload = request.get("payload", {})
-        cmd = payload.keys()
-        for cmd in payload.keys():
-            print(f'{name}: {cmd} -> {value}')
-    elif not set_cmd:
-        print(value)
+        print(f'{psu_name}: {cmd} -> {value}')
+    else:
+        if not cmd.startswith("set"):
+            print(value)
 
-    if set_cmd:
-        return None
-
-    return value

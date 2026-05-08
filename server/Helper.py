@@ -1,5 +1,3 @@
-import re
-from CLI.helper import CONSTS
 import logger
 from server import PSU
 from server.Translate import get_dic_for_PSU

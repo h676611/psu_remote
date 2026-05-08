@@ -1,6 +1,11 @@
 import re
 
-from CLI.helper import CONSTS
+CONSTS: dict[str, float] = {
+    "mu": 1e-6, 
+    "m": 1e-3,
+    "n": 1e-9,
+    "": 1
+}
 
 
 def process_payload(payload: dict) -> dict:
