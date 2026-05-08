@@ -15,7 +15,7 @@ class ZmqClient(QtCore.QObject):
     status_update_received: QtCore.pyqtSignal = QtCore.pyqtSignal(dict)
     error_received: QtCore.pyqtSignal = QtCore.pyqtSignal(dict)
 
-    def __init__(self, address="tcp://localhost:1234"):
+    def __init__(self, address="tcp://10.0.0.2:5555"):
         super().__init__()
         self.address: str = address
         self._running: bool = True

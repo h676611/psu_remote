@@ -1,7 +1,7 @@
 {
     "zmq": {
-        "server_address": "tcp://*:1234",
-        "client_address": "tcp://localhost:1234"
+        "server_address": "tcp://*:5555",
+        "client_address": "tcp://10.0.0.2:5555"
     },
     "devices": {
         "hmp4040": {
