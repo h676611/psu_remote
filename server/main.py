@@ -17,14 +17,20 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    # Prefer project-level config.json during development, otherwise fall back
+    # to the packaged default config inside the server module.
     config_file = {}
-    try:
-        config_path = Path(__file__).resolve().parents[1] / 'config.json'
-        if config_path.exists():
-            with open(config_path, 'r', encoding='utf-8') as file:
-                config_file = json.load(file)
-    except Exception:
-        config_file = {}
+    root_config_path = Path(__file__).resolve().parents[1] / 'config.json'
+    package_config_path = Path(__file__).resolve().parent / 'psu_config.json'
+
+    for config_path in (root_config_path, package_config_path):
+        try:
+            if config_path.exists():
+                with open(config_path, 'r', encoding='utf-8') as file:
+                    config_file = json.load(file)
+                break
+        except Exception:
+            config_file = {}
 
     # Extract device config for Server
     device_config = config_file.get('devices', {})

@@ -1,4 +1,4 @@
-from zipfile import Path
+from pathlib import Path
 
 from PyQt5 import QtWidgets, QtCore
 from GUI.GUI_zmq_client import ZmqClient
@@ -18,13 +18,18 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Load config and create ZMQ Client
         config_file = {}
-        try:
-            config_path = Path(__file__).resolve().parents[1] / 'config.json'
-            if config_path.exists():
-                with open(config_path, 'r', encoding='utf-8') as file:
-                    config_file = json.load(file)
-        except Exception:
-            config_file = {}
+        root_config_path = Path(__file__).resolve().parents[1] / 'config.json'
+        package_config_path = Path(__file__).resolve().parents[1] / 'server' / 'psu_config.json'
+
+        for config_path in (root_config_path, package_config_path):
+            try:
+                if config_path.exists():
+                    with open(config_path, 'r', encoding='utf-8') as file:
+                        config_file = json.load(file)
+                    break
+            except Exception:
+                logger.warning("Could not load config file %s, using default settings.", config_path)
+                config_file = {}
 
         zmq_address = config_file.get('zmq', {}).get('client_address', 'tcp://10.0.0.2:5555')
         self.zmq_client: ZmqClient = ZmqClient(address=zmq_address)

@@ -36,9 +36,11 @@ pip install -e .
 
 ## Configuration
 
-The server reads [config.json](config.json) automatically when it starts.
+The server loads configuration in this order:
+1. [config.json](config.json) in the project root (if present)
+2. [server/psu_config.json](server/psu_config.json) packaged with the project
 
-Use it to configure:
+Use this structure for either file:
 ```json
 {
 	"zmq": {

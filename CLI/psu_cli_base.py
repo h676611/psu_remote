@@ -25,18 +25,22 @@ def run_cli(parser_class: type, psu_name: str, inargs=None) -> None:
         "payload": payload
     }
 
-    # load config file relative to this module (not current working dir)
+    # Load config relative to the project root first, then the packaged default.
     config_file = {}
-    try:
-        config_path = Path(__file__).resolve().parents[1] / 'config.json'
-        if config_path.exists():
-            with open(config_path, 'r', encoding='utf-8') as file:
-                config_file = json.load(file)
-    except Exception:
-        config_file = {}
+    root_config_path = Path(__file__).resolve().parents[1] / 'config.json'
+    package_config_path = Path(__file__).resolve().parents[1] / 'server' / 'psu_config.json'
+
+    for config_path in (root_config_path, package_config_path):
+        try:
+            if config_path.exists():
+                with open(config_path, 'r', encoding='utf-8') as file:
+                    config_file = json.load(file)
+                break
+        except Exception:
+            config_file = {}
 
     # fallback default address when config or key is missing
-    address = config_file.get('zmq_address', 'tcp://10.0.0.2:5555')
+    address = config_file.get('zmq', {}).get('client_address', 'tcp://10.0.0.2:5555')
     zmq_client: ZMQClient = ZMQClient(address=address)
     try:
         reply: dict = zmq_client.send_receive(request)
