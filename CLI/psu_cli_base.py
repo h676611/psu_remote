@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 from .zmq_client import ZMQClient
 import ordered_argparse
@@ -7,6 +8,7 @@ from .helper import process_reply
 
 
 def run_cli(parser_class: type, psu_name: str, inargs=None) -> None:
+    """Runs the CLI for a given PSU model using the specified parser class."""
     parser: ordered_argparse.ArgumentParser = parser_class()
     args: ordered_argparse.OrderedNamespace = parser.parse_args(inargs, namespace=ordered_argparse.OrderedNamespace())
 
@@ -23,16 +25,18 @@ def run_cli(parser_class: type, psu_name: str, inargs=None) -> None:
         "payload": payload
     }
 
-    # relative import of config file to get zmq addres
-    
-    #try:
-    #    with open('config.json', 'r') as file:
-    #        config_file = json.load(file)
-    #except Exception:
-    #    pass
+    # load config file relative to this module (not current working dir)
+    config_file = {}
+    try:
+        config_path = Path(__file__).resolve().parents[1] / 'config.json'
+        if config_path.exists():
+            with open(config_path, 'r', encoding='utf-8') as file:
+                config_file = json.load(file)
+    except Exception:
+        config_file = {}
 
-
-    address = 'tcp://10.0.0.2:5555'
+    # fallback default address when config or key is missing
+    address = config_file.get('zmq_address', 'tcp://10.0.0.2:5555')
     zmq_client: ZMQClient = ZMQClient(address=address)
     try:
         reply: dict = zmq_client.send_receive(request)

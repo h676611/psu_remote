@@ -14,12 +14,11 @@ logger = setup_logger("PSUqueue")
 
 class PSUQueue(ABC):
     """Abstract base class for PSU command queues. Handles command processing and status management for a specific PSU.
-    Subclasses should implement the handle_get_command, handle_set_command, and refresh_status methods for their specific PSU model.
+    Subclasses should implement the handle_get_command and handle_set_command methods for their specific PSU model.
     """
 
     def __init__(self, psu: PSU, server: "Server"):
         from .Helper import Helper
-
         self.psu: PSU = psu
         self.server: "Server" = server
         self.queue: queue.Queue = queue.Queue()
@@ -39,20 +38,10 @@ class PSUQueue(ABC):
 
 
     def refresh_status(self) -> None:
-        """Refresh the internal status of the PSU by querying it. Should update the self.status dictionary with the latest values."""
-        logger.debug(f"Refreshing status for PSU {self.name}")
         self.server.send_status_to_GUI(psu_name=self.name)
 
-    def should_split_aggregated_commands(self) -> bool:
-        """Return whether aggregated CLI commands should be split before queueing."""
-        return True
-
     def add_command(self, identity: bytes | None, payload: dict) -> None:
-        
-        # if self.should_split_aggregated_commands():
-        #     payload = self.helper.seperate_aggregated_commands(payload)
         payload = process_payload(payload)
-        # logger.debug(f"Payload after processing: {payload}")
         self.queue.put((identity, payload))
 
     def worker(self):
@@ -63,40 +52,30 @@ class PSUQueue(ABC):
 
             }
             for command, args in payload.items():
-                if (command.startswith("get")): #If it is a get command we query the psu
-                        last_response: str = self.handle_get_command(command, args)
-                        reply_payload[command] = last_response
-                        # logger.debug(f"handeling get command: {command}, args: {args}")
+                if command.startswith("get"):
+                    last_response: str = self.handle_get_command(command, args)
+                    reply_payload[command] = last_response
 
-                elif command == "refresh":
-                    logger.debug(f"handeling refresh command for {self.psu.name}")
-                    self.refresh_status()
-
-                else: # if it is a set command we just send the command to the psu and then query the state of the psu
-                    # logger.debug(f"handeling set command: {command}, args: {args}")
+                elif command.startswith("set"):
                     self.handle_set_command(command, args)
                     reply_payload[command] = "OK"
 
-
-            # TODO sende bedre response på query i stedet for status update 
+                elif command == "refresh":
+                    self.refresh_status()
             
             reply = {
                 "type": "scpi_reply",
                 "name": self.name,
                 "payload": reply_payload
             }
+            # If identity is None, command was added internally by the server, so we don't need to send a reply to any specific client
             if identity:
                 self.server.send_response(identity, reply)
 
-            # self.refresh_status()
-
-            # self.server.send_status(identity, psu_name=self.name)
-
+            # If any set command was processed, we want to update the GUI with the new status
             if any(key.startswith("set") for key in payload):
                 self.server.send_status_to_GUI(psu_name=self.name)
 
-
-            # self.server.send_status_update_to_all(self.status, psu_name=self.name)
     
 
 

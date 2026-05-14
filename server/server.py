@@ -35,14 +35,14 @@ class Server:
         logger.info("Server started")
         logger.info("Connecting to PSUs")
 
+        # On startup, connect to all PSUs defined in the config
         for name, psu in self.config.items():
             self.connect_psu(psu_name=name)
 
     def handle_request(self, identity: bytes, request: dict):
+        """Handle incoming requests from clients. Distinguishes between system commands and SCPI commands, dispatching them to the appropriate handlers."""
         payload: dict = request.get("payload", {})
         psu_name: str | None = request.get("name")
-
-        logger.info(f"received request: {request}")
 
         system_commands = {"connect", "disconnect", "status", "refresh", "connect_GUI"}
         for command, value in payload.items():
@@ -70,6 +70,7 @@ class Server:
         handler(identity=identity, psu_name=psu_name)
 
     def refresh_status(self, identity: bytes, psu_name: str) -> None:
+        """Send a refresh command to the specified PSU queue to update its status and send it to the GUI."""
         if psu_name not in self.psu_queues:
             self.send_error(identity, "PSU not connected", psu_name=psu_name)
             return
@@ -96,8 +97,6 @@ class Server:
                 "refresh": True
             }
             psu_queue.add_command(None, refresh_payload)
-
-        logger.info(f"Adding refresh command to queue for PSU {psu_name}")
 
     def handle_scpi_command(self, identity: bytes, psu_name: str, payload: dict) -> None:
         if psu_name not in self.psu_queues:
@@ -195,7 +194,6 @@ class Server:
             "status": status,
             "psu_name": psu_name
         }
-        logger.debug(F"sending status: {status}")
         for gui in self.connected_GUIs:
             self.send_response(gui, status_message)
 
@@ -213,10 +211,10 @@ class Server:
         if self.zmq_server is None:
             raise RuntimeError("ZMQ server is not attached")
         self.zmq_server.send_response(identity, response)
+
     def send_system_to_GUI(self, reply):
          for gui in self.connected_GUIs:
             self.send_response(gui, reply)
-
 
     def check_psu_addresses(self) -> None:
         """On startup, check if PSUs in config are on the correct addresses."""

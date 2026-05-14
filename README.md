@@ -9,7 +9,7 @@ The project can be installed as a Python package. It is recommended to use a vir
 
 Clone the repository
 ```bash
-git clone https://github.com/h676611/test.git
+git clone https://github.com/h676611/psu_remote.git
 ```
 
 Create and activate a virtual environment

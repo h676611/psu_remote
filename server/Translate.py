@@ -1,7 +1,7 @@
-#Bruke denne for å oversette requests fra CLI og GUI over til tilsvarende pyvisa requests
 
 def get_dic_for_PSU(psu_name: str) -> dict: 
-    dic: dict[str, dict] = {# Legger til alle PSU og commandoer inn hær
+    """Helper function to retrieve the command dictionary for a given PSU name."""
+    dic: dict[str, dict] = {
         "hmp4040": HMP4040_dic,
         "k2400": K2400_dic,
         "k2450": K2450_dic,
@@ -24,7 +24,6 @@ K6500_dic: dict[str, str] = {
 }
 
 HMP4040_dic: dict[str, str] = {
-    #NB: Trailing spaces in these strings are important
     "get_id": "*IDN?",
     "set_channel": "INST OUT{}",
     "get_channel": "INST:NSEL?",
@@ -44,11 +43,8 @@ HMP4040_dic: dict[str, str] = {
     "get_display_output": "OUTP:SEL?",
     "get_current_limit": "VOLT ILIM?",
     "get_voltage_limit": "CURR VLIM?",
-    "set_remote": {"mixed": "SYST:MIX", "local": "SYST:LOC",
-                    "remote": "SYST:REM"},
     
     # aggragated commands
-    
     "set_current_voltage": "CURR {}\nVOLT {}",
     "set_channel_voltage": "INST OUT{}\nVOLT {}",
     "set_channel_current": "INST OUT{}\nCURR {}",
@@ -58,8 +54,6 @@ HMP4040_dic: dict[str, str] = {
     "get_channel_output": "INST OUT{}\nOUTP?"
 }
 K2400_dic: dict[str, str] = {
-    # Note: Some commands may differ on the 2400 vs. 2450.
-    # Adjust them if necessary for your particular 2400 SCPI requirements.
     "get_id": "*IDN?",
     "get_error": "SYST:ERR?",
     "set_output": "OUTP {}",
@@ -85,13 +79,10 @@ K2400_dic: dict[str, str] = {
     "get_current_range": "SOUR:CURR:RANG?",
     "get_voltage_range": "SOUR:VOLT:RANG?",
     
-    
     # aggragated commands
     "get_display_current_voltage_output": "SOUR:CURR?;:SOUR:VOLT?;:OUTP?",
-
 }
 K2450_dic: dict[str, str] = {
-    #NB: Trailing spaces in these strings are important
     "get_id": "*IDN?",
     "get_error": "SYST:ERR?",
     "set_output": "OUTP {}",
@@ -118,5 +109,4 @@ K2450_dic: dict[str, str] = {
 
     # aggragated commands
     "get_display_current_voltage_output": "SOUR:CURR?;:SOUR:VOLT?;:OUTP?",
-
 }

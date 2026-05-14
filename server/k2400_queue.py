@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 logger = setup_logger("K2400queue")
 
 class K2400Queue(PSUQueue):
+    """Queue class for controlling the K2400 power supply, handling command translation and status updates."""
     def __init__(self, psu: PSU, server: "Server"):
         super().__init__(psu=psu, server=server)
         self.name: str = "k2400"
@@ -48,8 +49,6 @@ class K2400Queue(PSUQueue):
                 
             except AttributeError:
                 logger.error(f"Error parsing response for {command}: {last_response}")
-
-        logger.info(f"Response: {last_response}")
 
         return last_response
     

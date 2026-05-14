@@ -2,6 +2,7 @@ import ordered_argparse
 
 
 def create_base_parser() -> ordered_argparse.ArgumentParser:
+    """Creates a base parser with common arguments for all PSU models."""
     base: ordered_argparse.ArgumentParser = ordered_argparse.ArgumentParser(add_help=False)
     base.add_argument(
         '--connect',
@@ -109,6 +110,7 @@ def create_base_parser() -> ordered_argparse.ArgumentParser:
     
 
 class Hmp4040_Parser(ordered_argparse.ArgumentParser):
+    """Parser for HMP4040 PSU commands."""
     def __init__(self):
         base: ordered_argparse.ArgumentParser = create_base_parser()
 
@@ -188,6 +190,7 @@ class Hmp4040_Parser(ordered_argparse.ArgumentParser):
         )
 
 class K2400_Parser(ordered_argparse.ArgumentParser):
+    """Parser for K2400 PSU commands."""
     def __init__(self):
         base: ordered_argparse.ArgumentParser = create_base_parser()
         super().__init__(
@@ -222,6 +225,7 @@ class K2400_Parser(ordered_argparse.ArgumentParser):
         )
 
 class K2450_Parser(ordered_argparse.ArgumentParser):
+    """Parser for K2450 PSU commands."""
     def __init__(self):
         base: ordered_argparse.ArgumentParser = create_base_parser()
         super().__init__(
@@ -270,6 +274,7 @@ class K2450_Parser(ordered_argparse.ArgumentParser):
         )
     
 class K6500_Parser(ordered_argparse.ArgumentParser):
+    """Parser for K6500 DMM commands."""
     def __init__(self):
         super().__init__(
             description='K6500 DMM CLI'

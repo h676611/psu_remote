@@ -1,8 +1,8 @@
-import queue
 import zmq
 
 
 class ZMQClient:
+   """ZeroMQ client for sending requests and receiving replies from the server."""
    def __init__(self, address: str = "tcp://10.0.0.2:5555"):
       self.context: zmq.Context = zmq.Context()
       self.socket: zmq.Socket = self.context.socket(zmq.DEALER)

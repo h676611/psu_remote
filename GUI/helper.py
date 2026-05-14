@@ -32,6 +32,7 @@ def si_prefix(value: float):
 
 
 class StepperOnlyBox(QWidget):
+    """A custom widget that mimics a combo box but only has stepper buttons to cycle through options."""
     def __init__(self, items=None, parent=None):
         super().__init__(parent)
         self.items = items or []

@@ -30,6 +30,7 @@ INSTRUMENT_CONFIG = {
 
 
 class FieldHandler:
+    """Helper class to manage parsing and updating of voltage/current fields with SI prefix handling."""
     def __init__(self, field_name: str, suffix: str):
         self.field_name = field_name
         self.suffix = suffix
@@ -259,26 +260,16 @@ class ControlRow(QtWidgets.QWidget):
             return
         
         if reply.get("payload", {}).get("disconnect") == "OK":
-            # logger.info(f"Disconnect acknowledged by server for {self.instrument_name}")
-
             self.connected = False
             self.toggle_button.setText("Start")
-            # logger.info(f"Connection stopped for {self.instrument_name}")
-
             return
         
         if reply.get("payload", {}).get("connect") == "OK":
-            # logger.info(f"Connect acknowledged by server for {self.instrument_name}")
-
             self.connected = True
             self.toggle_button.setText("Stop")
-            # logger.info(f"Connection started for {self.instrument_name}")
-
             return
 
         if reply.get("payload", {}).get("connect_GUI") == "OK":
-            # should only be received by the first row, but we check name just in case
-            # logger.info(f"GUI connection acknowledged by server for {self.instrument_name}")
             return
 
 
@@ -299,13 +290,11 @@ class ControlRow(QtWidgets.QWidget):
 
         for index, row in enumerate(self.rows):
             channel = index + 1
-            # Server sends channel keys as ints, but JSON may convert to strings
             channel_state = status.get(channel) or status.get(str(channel))
             
             if not isinstance(channel_state, dict):
                 continue
             
-            # Update voltage if present and supported by instrument
             if "voltage" in self.config["fields"] and "voltage" in channel_state:
                 voltage_handler.parse_and_update(row, channel_state['voltage'], si_prefix)
             else:
@@ -337,7 +326,6 @@ class ControlRow(QtWidgets.QWidget):
         error_msg: str = payload.get("message", "Unknown error")
         self.error_label.setText(f"Error: {error_msg}")
         self.error_label.show()
-        # self.connected = self._prev_connected
         self.toggle_button.setText("Stop" if self.connected else "Start")
 
     def on_row_submitted(self, row_index: int, output_checked: bool) -> None:
@@ -357,7 +345,6 @@ class ControlRow(QtWidgets.QWidget):
         request = {"name": self.instrument_name, "payload": payload}
         logger.info(f"Sending request: {request}")
         self.send_request.emit(request)
-
 
 
     def send_refresh_request(self) -> None:

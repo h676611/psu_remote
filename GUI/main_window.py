@@ -1,3 +1,5 @@
+from zipfile import Path
+
 from PyQt5 import QtWidgets, QtCore
 from GUI.GUI_zmq_client import ZmqClient
 from GUI.control_row import ControlRow
@@ -15,13 +17,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setGeometry(100, 100, 600, 400)
 
         # Load config and create ZMQ Client
-        with open('config.json', 'r') as file:
-            config = json.load(file)
-        zmq_address = config.get('zmq', {}).get('client_address', 'tcp://localhost:1234')
+        config_file = {}
+        try:
+            config_path = Path(__file__).resolve().parents[1] / 'config.json'
+            if config_path.exists():
+                with open(config_path, 'r', encoding='utf-8') as file:
+                    config_file = json.load(file)
+        except Exception:
+            config_file = {}
+
+        zmq_address = config_file.get('zmq', {}).get('client_address', 'tcp://10.0.0.2:5555')
         self.zmq_client: ZmqClient = ZmqClient(address=zmq_address)
 
         # Load instrument names and display names from config
-        devices = config.get('devices', {})
+        devices = config_file.get('devices', {})
         self.instrument_names: list[str] = list(devices.keys())
         self.connection_names: list[str] = [devices[name].get('display_name', name) for name in self.instrument_names]
         self.control_rows: list[ControlRow] = []
@@ -48,8 +57,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.zmq_client.status_update_received.connect(row.handle_status_update)
             self.zmq_client.error_received.connect(row.handle_error)
 
-        # if self.server_connected:
-        #     QtCore.QTimer.singleShot(100, self.refresh_all)
 
 
     def init_ui(self) -> None:

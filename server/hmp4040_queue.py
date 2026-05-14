@@ -10,6 +10,7 @@ if TYPE_CHECKING:
 logger = setup_logger("HMP4040queue")
 
 class HMP4040Queue(PSUQueue):
+    """Queue class for controlling the HMP4040 power supply, handling command translation and status updates."""
     def __init__(self, psu: PSU, server: "Server"):
         super().__init__(psu=psu, server=server)
         self.name: str = "hmp4040"

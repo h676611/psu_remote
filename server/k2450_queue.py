@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 logger = setup_logger("K2450queue")
 
 class K2450Queue(PSUQueue):
+    """Queue class for controlling the K2450 power supply, handling command translation and status updates."""
     def __init__(self, psu: PSU, server: "Server"):
         super().__init__(psu=psu, server=server)
         self.name: str = "k2450"
@@ -47,15 +48,12 @@ class K2450Queue(PSUQueue):
             except (AttributeError, ValueError) as e:
                 logger.error(f"Error parsing response for {command}: {last_response} - Error: {e}")
 
-        logger.debug(f"Status: {self.status}")
         return last_response
     
 
     def handle_set_command(self, command: str, args: list | tuple | None) -> None:
         try:
             scpi_cmd: str = self.helper.cli_to_scpi(command, args)
-
-            logger.info(f"Writing (query) command: {scpi_cmd}")
 
             self.psu.write(scpi_cmd)
 
@@ -65,8 +63,6 @@ class K2450Queue(PSUQueue):
                 self.status[1]["current"] = args
             elif command == "set_output":
                 self.status[1]["output"] = args
-                
-            
 
         except Exception as e:
             logger.error(f"Error processing command {command} in k2450 queue with args {args}: {e}")

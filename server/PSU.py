@@ -20,47 +20,48 @@ class PSU:
         
         self.address: str = resource.resource_name
 
-    def query(self, command: str) -> str:
-        self.logger.info(f"Querying command: {command}")
+    def _extract_k2400_measurement(self, command: str, response: str) -> float | None:
+        """Extract measurement values from k2400 response (which contains multiple values)."""
+        if command == "MEAS:VOLT?":
+            # return the first value from the comma-separated response
+            voltage_str = response.split(",")[0].strip()
+            return float(voltage_str)
+        elif command == "MEAS:CURR?":
+            # return the second value from the comma-separated response
+            current_str = response.split(",")[1].strip()
+            return float(current_str)
+        return None
 
-        if self.name == "k2400": # special handling for k2400, returns an array
-            if command == "MEAS:VOLT?":
-                voltage_response: str = self.resource.query(command)
-                voltage_str: str = voltage_response.split(",")[0].strip()
-                return float(voltage_str)
-            if command == "MEAS:CURR?":
-                current_response: str = self.resource.query(command)
-                current_str: str = current_response.split(",")[1].strip() #for lab testing
-                # current_str = current_response.split(",")[0].strip()
-                return float(current_str)
-            response: str = self.resource.query(command)
-
-        else:
-            response: str = self.resource.query(command)
-        self.logger.debug(f"Received response: {response}")
-
-        # convert response to float if possible
+    def _convert_to_float(self, response: str) -> float | None:
+        """Attempt to convert response string to float."""
         try:
-            response_float = float(response)
-            return response_float
+            return float(response)
         except ValueError:
             self.logger.error(f"Response is not a float: {response}")
-            pass
+            return None
 
-        return response
+    def query(self, command: str) -> str | float:
+        """Execute a SCPI query command and return the response.
+        
+        For k2400, special handling is applied for measurement commands.
+        Attempts to convert numeric responses to float.
+        """
+        response: str = self.resource.query(command)
+
+        # Special handling for k2400 measurements (returns comma-separated values)
+        if self.name == "k2400":
+            value = self._extract_k2400_measurement(command, response)
+            if value is not None:
+                return value
+
+        # Try to convert response to float
+        numeric_value = self._convert_to_float(response)
+        return numeric_value if numeric_value is not None else response
 
     def write(self, command: str) -> None:
         if self.name == "k2450" and command.startswith("SOUR:VOLT"):
-            #self.resource.write(command)
-            self.logger.info(f'writing {command};:MEAS:VOLT?')
+            # special handling for k2450, need to query voltage after setting it to ensure it was set correctly
+
             self.resource.query(f"{command};:MEAS:VOLT?")
         else:
-            self.logger.info(f'writing {command}')
             self.resource.write(command)
-            
-    
-    def read(self) -> str:
-        buffer = self.resource.read()
-        self.logger.info(f"reading buffer: {buffer}")
-        return buffer
-            

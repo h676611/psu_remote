@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
 logger = logger.setup_logger("Helper")
 class Helper:
+    """Helper class to convert CLI commands to SCPI commands based on the PSU's command dictionary."""
     def __init__(self, PSU: PSU):
         self.psu = PSU
         self.dic: dict = get_dic_for_PSU(self.psu.name)
@@ -38,38 +39,6 @@ class Helper:
             scpi_cmd = base_scpi.format(args)
         
         return scpi_cmd
-    
-        
-    def seperate_aggregated_commands(self, payload: dict) -> dict:
-        # This function takes a payload with aggregated commands and seperates them into individual commands
-        # We will turn the cli command into the scpi command, check for a ";" seperate the commands and then turn them back into cli commands and add them to the queue
-        new_payload: dict = {}
-        for command, args in payload.items():
-            scpi_cmd: str = self.cli_to_scpi(command, args)
-            if ";" in scpi_cmd:
-                scpi_commands: list = scpi_cmd.split(";")
-                for i in range(len(scpi_commands)):
-                    cli_command: str = self.scpi_to_cli(scpi_commands[i])
-                    if isinstance(args, (list, tuple)) and i < len(args):
-                        if cli_command == "set_channel": # if the command is set channel we need to make sure the argument is an integer and not a float since the psu expects an integer for the channel number
-                            new_payload[cli_command] = int(args[i])
-                        else:
-                            new_payload[cli_command] = float(args[i])
-                    else:
-                        new_payload[cli_command] = float(args)
-            else:
-                new_payload[command] = args
-
-        logger.debug(f"Seperated aggregated command: {new_payload}")
-        return new_payload
-        
-    def scpi_to_cli(self, scpi_cmd: str) -> str:
-        # This function takes a scpi command and turns it back into a cli command by looking for the scpi command in the dic and returning the corresponding cli command
-        for cli_command, scpi_command in self.dic.items():
-            if scpi_cmd.startswith(scpi_command.split("{")[0]): # we split the scpi command at the "{" to ignore the arguments when comparing
-                logger.debug(f'converted command: {cli_command}')
-                return cli_command
-        raise ValueError(f"Unknown scpi command: {scpi_cmd}")
     
 def make_queue(psu: PSU, server: "Server") -> "PSUQueue":
     queue: PSUQueue | None = None

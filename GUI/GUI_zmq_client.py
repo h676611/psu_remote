@@ -8,7 +8,7 @@ from logger import setup_logger
 logger = setup_logger(name="zmq_client")
 
 class ZmqClient(QtCore.QObject):
-    """A ZeroMQ client integrated with PyQt5 for asynchronous communication with the server."""
+    """ZeroMQ client integrated with PyQt5 for asynchronous communication with the server."""
 
     connect_GUI_received: QtCore.pyqtSignal = QtCore.pyqtSignal(dict)
     system_reply_received: QtCore.pyqtSignal = QtCore.pyqtSignal(dict)
@@ -25,7 +25,6 @@ class ZmqClient(QtCore.QObject):
 
     @QtCore.pyqtSlot(dict)
     def send(self, request: dict) -> None:
-        # logger.info(f"Sending request: {request}")
         self._outbound_messages.put(request)
 
     def _io_loop(self) -> None:
@@ -53,14 +52,11 @@ class ZmqClient(QtCore.QObject):
                 msg: dict = socket.recv_json()
                 msg_type: str = msg.get("type")
 
-                # logger.info(f'received: {msg}')
-
                 if msg_type in ("system_reply"):
                     if msg.get("payload", {}).keys() == {"connect_GUI"}:
                         self.connect_GUI_received.emit(msg)
                     else:
                         self.system_reply_received.emit(msg)
-                # elif msg_type in ("status_update", "scpi_reply"):
                 elif msg_type in ("status_update"):
                     self.status_update_received.emit(msg)
                 elif msg_type == "error":
