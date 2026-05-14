@@ -1,3 +1,4 @@
+import argparse
 import json
 from pathlib import Path
 import threading
@@ -7,6 +8,14 @@ from .zmq_server import ZmqServer
 
 def main() -> None:
     """Entry point for the server application."""
+
+    parser = argparse.ArgumentParser(description="Start the PSU server")
+    parser.add_argument(
+        "--simulate", "-s",
+        action="store_true",
+        help="Use the VISA simulation backend instead of real instruments",
+    )
+    args = parser.parse_args()
 
     config_file = {}
     try:
@@ -19,8 +28,9 @@ def main() -> None:
 
     # Extract device config for Server
     device_config = config_file.get('devices', {})
+    simulate_psus = args.simulate or config_file.get('simulate_psus', False)
 
-    server = Server(config=device_config, simulation=config_file.get('simulate_psus', False))
+    server = Server(config=device_config, simulation=simulate_psus)
     
     # Create ZmqServer with address from config
     zmq_address = config_file.get('zmq', {}).get('server_address', 'tcp://*:5555')
