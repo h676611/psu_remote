@@ -1,4 +1,4 @@
-Server, GUI client and CLI client for remote controlling instruments
+Server, GUI client and CLI client for remote controlling instruments.
 
 Based on:
 PSU_HUB: https://gitlab.cern.ch/shellesu/psu_hub
@@ -89,3 +89,8 @@ To see the available commands for an instrument client, use the --help option
 ```bash
 psu-hmp4040 --help
 ```
+
+## Authors
+- [Herman Dahlberg](https://github.com/h676611)
+- [Lars Paulsen Løge](https://github.com/larsploge)
+- [Henning Øinas](https://github.com/669837)

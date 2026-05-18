@@ -20,6 +20,11 @@ dependencies = [
     "typing_extensions==4.15.0",
     "ordered_argparse"
 ]
+authors = [
+  {name = "Herman Dahlberg", email = "hermandah@gmail.com"},
+  {name = "Henning Øinas", email = "henning.oinas@gmail.com"},
+  {name = "Lars Paulsen Løge", email = "larsloge9@gmail.com"}
+]
 
 [tool.setuptools]
 py-modules = ["logger"]
